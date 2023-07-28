@@ -79,14 +79,14 @@ foreach (string languageDirectory in languageDirectories)
             var musicFiles = Directory.GetFiles(musicFilePath).ToList();
             foreach (var musicFile in musicFiles)
             {
-                DirectoryInfo musicFileInfo = new(musicFile);
-
+                FileInfo fileInfo = new(musicFile);
+                // DirectoryInfo musicFileInfo = new(musicFile);
                 if (!isJoined)
                 {
-                    if (musicFileInfo.FullName == @"D:\ASR\汉语普通话\19\1555637128.wav")
+                    if (fileInfo.FullName == @"D:\ASR\汉语普通话\19\1555637128.wav")
                     {
                         isJoined = true;
-                        await TestASRApisAsync(musicFileInfo);
+                        await TestASRApisAsync(fileInfo);
                         // taskLists.Add(Task.Run(async () =>
                         // {
                         // }));
@@ -100,7 +100,7 @@ foreach (string languageDirectory in languageDirectories)
                 else
                 {
 
-                    await TestASRApisAsync(musicFileInfo);
+                    await TestASRApisAsync(fileInfo);
 
                 }
 
@@ -117,7 +117,7 @@ foreach (string languageDirectory in languageDirectories)
     }
 }
 
-async Task TestASRApisAsync(DirectoryInfo musicFileInfo)
+async Task TestASRApisAsync(FileInfo musicFileInfo)
 {
 
     // 设置请求的 URL
@@ -147,7 +147,8 @@ async Task TestASRApisAsync(DirectoryInfo musicFileInfo)
         {
             ModelType = "base",
             Task = "transcribe",
-            Language = languageMap[musicFileInfo!.Parent!.Parent!.Name],
+            Language = languageMap[musicFileInfo!.Directory!
+            .Parent!.Name],
             OutPut = "json",
             InitialPrompt = "",
             Encode = true,
