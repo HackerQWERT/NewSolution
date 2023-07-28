@@ -1,0 +1,1 @@
+"{\"model_type\":\"base\",\"task\":\"transcribe\",\"language\":\"ko\",\"output\":\"json\",\"initial_prompt\":\"\",\"encode\":true,\"word_timestamps\":false}"
