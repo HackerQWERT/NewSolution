@@ -1,7 +1,5 @@
 ﻿namespace ASR.Models;
 
-
-
 [Table("asr_zs_test")]
 public class ASRZsTest
 {
