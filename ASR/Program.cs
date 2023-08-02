@@ -14,15 +14,16 @@ services.AddSingleton<ILogger>(Serilog.Log.Logger);
 services.AddDbContext<MyDbContext>(options =>
             options.UseMySql(MyDbContext.ConnectionString, ServerVersion.AutoDetect(MyDbContext.ConnectionString))
         );
-
 // 创建服务提供程序
-var serviceProvider = services.BuildServiceProvider();
+var serviceProvider = services.BuildServiceProvider(true);
 
-// await TestASRApis.StartAsync(serviceProvider);
-Stopwatch stopwatch = new();
-stopwatch.Start();
-await UpdateASRZsTransContent.StartAsync(serviceProvider);
-stopwatch.Stop();
-System.Console.WriteLine(stopwatch.ElapsedMilliseconds);
-//1023ms
-//5944ms
+
+await TestASRApis.StartAsync(serviceProvider);
+
+// Stopwatch stopwatch = new();
+// stopwatch.Start();
+// await UpdateASRZsTransContent.StartAsync(serviceProvider);
+// stopwatch.Stop();
+// System.Console.WriteLine(stopwatch.ElapsedMilliseconds);
+// //1023ms
+// //5944ms

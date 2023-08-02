@@ -11,10 +11,12 @@ public class TestASRApis
 
     public static async Task StartAsync(ServiceProvider serviceProvider)
     {
-        await TestASRApisAsync(serviceProvider);
+        using var scope = serviceProvider.CreateAsyncScope();
+
+        await TestASRApisAsync(scope.ServiceProvider);
     }
 
-    private static async Task TestASRApisAsync(ServiceProvider serviceProvider)
+    private static async Task TestASRApisAsync(IServiceProvider serviceProvider)
     {
 
         var logger = serviceProvider.GetRequiredService<ILogger>();

@@ -8,9 +8,12 @@ public class UpdateASRZsTransContent
 
     public static async Task StartAsync(ServiceProvider serviceProvider)
     {
-        await UpdateASRZsTransContentAsync(serviceProvider);
+        using var scope = serviceProvider.CreateAsyncScope();
+
+        await UpdateASRZsTransContentAsync(scope.ServiceProvider);
     }
-    public static async Task UpdateASRZsTransContentAsync(ServiceProvider serviceProvider)
+
+    public static async Task UpdateASRZsTransContentAsync(IServiceProvider serviceProvider)
     {
         var logger = serviceProvider.GetRequiredService<ILogger>();
         var myDbContext = serviceProvider.GetRequiredService<MyDbContext>();

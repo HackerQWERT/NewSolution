@@ -11,11 +11,13 @@ Serilog.Log.Logger = new LoggerConfiguration()
 services.AddSingleton<ILogger>(Serilog.Log.Logger);
 
 // 创建服务提供程序
-var serviceProvider = services.BuildServiceProvider();
+var serviceProvider = services.BuildServiceProvider(true);
 
+
+var scope = serviceProvider.CreateAsyncScope();
 
 // 获取服务
-var logger = serviceProvider.GetRequiredService<ILogger>();
+var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
 
 string connectionString = "Server=localhost;Port=3306;Database=A;Uid=root;Pwd=1234;";
 
