@@ -18,4 +18,11 @@ services.AddDbContext<MyDbContext>(options =>
 // 创建服务提供程序
 var serviceProvider = services.BuildServiceProvider();
 
-await TestASRApis.StartAsync(serviceProvider);
+// await TestASRApis.StartAsync(serviceProvider);
+Stopwatch stopwatch = new();
+stopwatch.Start();
+await UpdateASRZsTransContent.StartAsync(serviceProvider);
+stopwatch.Stop();
+System.Console.WriteLine(stopwatch.ElapsedMilliseconds);
+//1023ms
+//5944ms

@@ -12,6 +12,7 @@ public class MyDbContext : DbContext
 
     public DbSet<ASRTest> ASRTest { get; set; }
     public DbSet<ASRZsTest> ASRZsTest { get; set; }
+    public DbSet<ASRTrans> ASRTrans { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
