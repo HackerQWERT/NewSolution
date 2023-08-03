@@ -1,9 +1,9 @@
-namespace ClearLogicalDirectoriesFIleSystem.Services;
+﻿
+namespace JaegerWebAPI.Services;
 
 public class MyDbContext : DbContext
 {
-
-    public string ConnectionString { get; set; }
+    public static string ConnectionString { get; set; } = "Server=localhost;Port=3306;Database=ASR;Uid=root;Pwd=1234;";
 
     public MyDbContext(DbContextOptions<MyDbContext> options) : base(options)
     {
@@ -11,8 +11,6 @@ public class MyDbContext : DbContext
     }
 
 
-    public DbSet<FileItem> FileItems { get; set; }
-    public DbSet<FileItemBak> FileItemsBak { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -24,6 +22,7 @@ public class MyDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
 
     }
 
