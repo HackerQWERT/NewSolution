@@ -20,10 +20,4 @@ var serviceProvider = services.BuildServiceProvider(true);
 
 await TestASRApis.StartAsync(serviceProvider);
 
-// Stopwatch stopwatch = new();
-// stopwatch.Start();
-// await UpdateASRZsTransContent.StartAsync(serviceProvider);
-// stopwatch.Stop();
-// System.Console.WriteLine(stopwatch.ElapsedMilliseconds);
-// //1023ms
-// //5944ms
+await UpdateASRZsTransContent.StartAsync(serviceProvider);

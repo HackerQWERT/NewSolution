@@ -8,9 +8,17 @@ public class UpdateASRZsTransContent
 
     public static async Task StartAsync(ServiceProvider serviceProvider)
     {
-        using var scope = serviceProvider.CreateAsyncScope();
 
+        Stopwatch stopwatch = new();
+        stopwatch.Start();
+
+        using var scope = serviceProvider.CreateAsyncScope();
         await UpdateASRZsTransContentAsync(scope.ServiceProvider);
+
+        stopwatch.Stop();
+
+        Console.WriteLine(stopwatch.ElapsedMilliseconds);
+
     }
 
     public static async Task UpdateASRZsTransContentAsync(IServiceProvider serviceProvider)
