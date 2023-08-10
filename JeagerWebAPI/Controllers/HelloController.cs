@@ -1,4 +1,4 @@
-﻿
+
 namespace JaegerWebAPI.Controllers;
 [ValidateModel]
 [ApiController]
@@ -42,6 +42,7 @@ public class HelloController : ControllerBase
         {
             // Process the file stream here
         }
+
 
         // 记录 span 结束
         span.Finish();
