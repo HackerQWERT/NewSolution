@@ -1,3 +1,9 @@
+# Start ES
+
+$cd /path/to/elasticsearch$
+
+$./bin/elasticsearch$
+
 # 配置 ES
 
 https://www.elastic.co/guide/en/elasticsearch/reference/8.9/docker.html#docker-cli-run-dev-mode
@@ -46,7 +52,13 @@ $`安装证书`$
 
 `curl --cacert http_ca.crt -u elastic https://localhost:9200`
 
-## Elasticsearch 安全配置信息
+## 使用 elasticsearch-plugin 进行安装（从版本 v5.5.1 开始支持）：
+
+https://github.com/medcl/elasticsearch-analysis-ik
+
+`./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v8.8.2/elasticsearch-analysis-ik-8.8.2.zip`
+
+# Elasticsearch 安全配置信息
 
 Elasticsearch 的安全功能已经自动配置完成:
 
@@ -55,24 +67,43 @@ Elasticsearch 的安全功能已经自动配置完成:
 
 ### elastic 用户密码
 
-`+EUF8y2taO0B=8KN4rGw`
+#### 8.9.0
+
+`li*M8VNdSsCRvU0IHoE3`
+
+#### 8.8.2
+
+`eGIutE2ZGircY53s30tf`
 
 可以使用 `bin/elasticsearch-reset-password -u elastic` 重置密码。
 
 ### HTTP CA 证书 SHA256 指纹
 
-` 84af81652687827019988377b4d44f4c319f82296bbcf25064c41a4fc10dbe72`
+#### 8.9.0
+
+` 67d28593b8f52ad07bdef8da44fccba1ad05fb2e9ae0bc9729d471eff1ee88a3`
+
+#### 8.8.2
+
+` bb7754cc33e56594e4009d67086864064d25310d7d265ba2941b8fd46101288d`
 
 ### 复制证书
 
-`docker cp ES:/usr/share/elasticsearch/config/certs/http_ca.crt .`
+`docker cp es01:/usr/share/elasticsearch/config/certs/http_ca.crt .`
 
 ### 配置 Kibana 所需的入学令牌
 
+#### 8.9.0
+
+```
+  eyJ2ZXIiOiI4LjkuMCIsImFkciI6WyIxNzIuMTguMC4yOjkyMDAiXSwiZmdyIjoiNjdkMjg1OTNiOGY1MmFkMDdiZGVmOGRhNDRmY2NiYTFhZDA1ZmIyZTlhZTBiYzk3MjlkNDcxZWZmMWVlODhhMyIsImtleSI6IjZEc2k0b2tCbGxtX2pnZ21PUlpxOk4zcU9yUnktUlJXcmxUZG1Sdm1KNUEifQ==
+
 ```
 
-eyJ2ZXIiOiI4LjkuMCIsImFkciI6WyIxNzIuMTguMC4yOjkyMDAiXSwiZmdyIjoiODRhZjgxNjUyNjg3ODI3MDE5OTg4Mzc3YjRkNDRmNGMzMTlmODIyOTZiYmNmMjUwNjRjNDFhNGZjMTBkYmU3MiIsImtleSI6IlZhR3Mzb2tCa3ljVlBrWnpqV2xoOktfSEpYNTJDVHdlVnlWZHBCX3VzZVEifQ==
+#### 8.8.2
 
+```
+ eyJ2ZXIiOiI4LjguMiIsImFkciI6WyIxNzIuMTguMC4yOjkyMDAiXSwiZmdyIjoiYmI3NzU0Y2MzM2U1NjU5NGU0MDA5ZDY3MDg2ODY0MDY0ZDI1MzEwZDdkMjY1YmEyOTQxYjhmZDQ2MTAxMjg4ZCIsImtleSI6Im5jTlE0b2tCMUl3bnREREZNV0d0OmFCYWExN3ZwUlVxZEJ1SV9sZERwREEifQ==
 ```
 
 注册令牌的有效期为 30 分钟。 如果您需要生成新的注册令牌，请在现有节点上运行 elasticsearch-create-enrollment-token 工具。 该工具位于 Docker 容器的 Elasticsearch bin 目录中。
@@ -83,10 +114,17 @@ eyJ2ZXIiOiI4LjkuMCIsImFkciI6WyIxNzIuMTguMC4yOjkyMDAiXSwiZmdyIjoiODRhZjgxNjUyNjg3
 
 ### 加入集群所需的入学令牌
 
+#### 8.9.0
+
+```
+  eyJ2ZXIiOiI4LjkuMCIsImFkciI6WyIxNzIuMTguMC4yOjkyMDAiXSwiZmdyIjoiNjdkMjg1OTNiOGY1MmFkMDdiZGVmOGRhNDRmY2NiYTFhZDA1ZmIyZTlhZTBiYzk3MjlkNDcxZWZmMWVlODhhMyIsImtleSI6IjV6c2k0b2tCbGxtX2pnZ21PUlpxOlRBQVBNZjNDVGFxM1ltUGRTVW1mMEEifQ==
+
 ```
 
-eyJ2ZXIiOiI4LjkuMCIsImFkciI6WyIxNzIuMTguMC4yOjkyMDAiXSwiZmdyIjoiODRhZjgxNjUyNjg3ODI3MDE5OTg4Mzc3YjRkNDRmNGMzMTlmODIyOTZiYmNmMjUwNjRjNDFhNGZjMTBkYmU3MiIsImtleSI6IlY2R3Mzb2tCa3ljVlBrWnpqV2xrOkg3c1lOTkdQUnptSzh5R1JXYkhocEEifQ==
+#### 8.8.2
 
+```
+  eyJ2ZXIiOiI4LjguMiIsImFkciI6WyIxNzIuMTguMC4yOjkyMDAiXSwiZmdyIjoiYmI3NzU0Y2MzM2U1NjU5NGU0MDA5ZDY3MDg2ODY0MDY0ZDI1MzEwZDdkMjY1YmEyOTQxYjhmZDQ2MTAxMjg4ZCIsImtleSI6Im5zTlE0b2tCMUl3bnREREZNV0d0OlV3bFZiMmNyU2Jhc0tiQV9kc1Voa0EifQ==
 ```
 
 ### 如果在 Docker 中运行,可使用以下命令加入集群
@@ -97,10 +135,16 @@ docker run -e "ENROLLMENT_TOKEN=<token>" docker.elastic.co/elasticsearch/elastic
 
 ```
 
+# Linux 安装 ES
+
+```
+wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.8.2-linux-x86_64.tar.gz
+wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.8.2-linux-x86_64.tar.gz.sha512
+shasum -a 512 -c elasticsearch-8.8.2-linux-x86_64.tar.gz.sha512
+tar -xzf elasticsearch-8.8.2-linux-x86_64.tar.gz
+cd elasticsearch-8.8.2/
 ```
 
 ```
-
-```
-
+LICENSE.txt  NOTICE.txt  README.asciidoc  bin  config  elasticsearch-8.9.0  elasticsearch-8.9.0-darwin-x86_64.tar.gz  jdk  lib  logs  modules  plugins
 ```

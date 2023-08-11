@@ -10,7 +10,7 @@ https://www.elastic.co/guide/en/kibana/current/docker.html#run-kibana-on-docker-
 
 `docker network create elastic`
 
-`拉取 Elasticsearch Docker 镜像：`
+## 拉取 Elasticsearch Docker 镜像：
 
 `docker pull docker.elastic.co/elasticsearch/elasticsearch:8.9.0`
 
@@ -32,12 +32,6 @@ https://www.elastic.co/guide/en/kibana/current/docker.html#run-kibana-on-docker-
 `docker pull docker.elastic.co/kibana/kibana:8.9.0`
 
 `docker run --name kib-01 --net elastic -p 5601:5601 docker.elastic.co/kibana/kibana:8.9.0`
-
-## 拉取 Kibana Docker 镜像：
-
-`docker pull docker.elastic.co/kibana/kibana:8.9.0`
-
-## 可选：验证 Kibana Docker 镜像签名：
 
 `wget https://artifacts.elastic.co/cosign.pub`
 
