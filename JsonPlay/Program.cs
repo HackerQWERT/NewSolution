@@ -1,13 +1,24 @@
-﻿public abstract class Animal
+﻿A a = new A();
+a.PrintA();
+
+
+public interface IA
 {
-    public virtual string Name { get; set; }
+    void PrintA();
+}
+interface IB : IA
+{
+
 }
 
-public class Dog : Animal
+
+
+public abstract class B
 {
-    public override string Name
-    {
-        get { return "Woof!"; }
-        set { }
-    }
+
+    abstract void PrintB();
+
+
+
+
 }

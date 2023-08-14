@@ -1,14 +1,14 @@
-# Order
+# $Order$
 
-## 创建索引
-
-`curl -k -XPUT -u elastic:eGIutE2ZGircY53s30tf https://localhost:9200/index`
-
-## 读取索引
+## $创建索引$
 
 `curl -k -XPUT -u elastic:eGIutE2ZGircY53s30tf https://localhost:9200/index`
 
-## 创建映射
+## $读取索引$
+
+`curl -k -XPUT -u elastic:eGIutE2ZGircY53s30tf https://localhost:9200/index`
+
+## $创建映射$
 
 ```
 curl   -k -u elastic:eGIutE2ZGircY53s30tf  -XPOST https://localhost:9200/index/_mapping -H 'Content-Type:application/json' -d'
@@ -24,7 +24,7 @@ curl   -k -u elastic:eGIutE2ZGircY53s30tf  -XPOST https://localhost:9200/index/_
 }'
 ```
 
-## 索引文档
+## $索引文档$
 
 ```
 curl -k -u elastic:eGIutE2ZGircY53s30tf  -XPOST https://localhost:9200/index/_create/1 -H 'Content-Type:application/json' -d'
@@ -53,7 +53,7 @@ curl -k -u elastic:eGIutE2ZGircY53s30tf -XPOST https://localhost:9200/index/_cre
 
 ```
 
-## 查询
+## $查询$
 
 ```
 
@@ -69,5 +69,45 @@ curl -k -u elastic:eGIutE2ZGircY53s30tf -XPOST https://localhost:9200/index/_sea
     }
 }
 '
+
+```
+
+## $Result$
+```
+{
+  "took": 196,
+  "timed_out": false,
+  "_shards": { "total": 1, "successful": 1, "skipped": 0, "failed": 0 },
+  "hits": {
+    "total": { "value": 2, "relation": "eq" },
+    "max_score": 0.642793,
+    "hits": [
+      {
+        "_index": "index",
+        "_id": "3",
+        "_score": 0.642793,
+        "_source": {
+          "content": "中韩渔警冲突调查：韩警平均每天扣 1 艘中国渔船"
+        },
+        "highlight": {
+          "content": [
+            "中韩渔警冲突调查：韩警平均每天扣 1 艘<tag1>中国</tag1>渔船"
+          ]
+        }
+      },
+      {
+        "_index": "index",
+        "_id": "4",
+        "_score": 0.642793,
+        "_source": { "content": "中国驻洛杉矶领事馆遭亚裔男子枪击 嫌犯已自首" },
+        "highlight": {
+          "content": [
+            "<tag1>中国</tag1>驻洛杉矶领事馆遭亚裔男子枪击 嫌犯已自首"
+          ]
+        }
+      }
+    ]
+  }
+}
 
 ```

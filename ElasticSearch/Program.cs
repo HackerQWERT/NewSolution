@@ -1,9 +1,10 @@
-﻿using Elasticsearch.Net;
-
+﻿
 var node = new Uri("https://localhost:9200"); // Elasticsearch节点的URL
 
 var settings = new ConnectionSettings(node)
-    .BasicAuthentication("elastic", "*1cUXTMYr*=PnbN_F0E-")
+    // .BasicAuthentication("elastic", "li*M8VNdSsCRvU0IHoE3") //8.9.0
+    .BasicAuthentication("elastic", "eGIutE2ZGircY53s30tf") //8.8.2
+
     .DefaultIndex("your-default-index"); // 设置默认索引
 
 
