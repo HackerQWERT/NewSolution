@@ -135,9 +135,9 @@ docker run -e "ENROLLMENT_TOKEN=<token>" docker.elastic.co/elasticsearch/elastic
 
 ```
 
-# Linux 安装 ES
+# $Linux安装ES$
 
-```
+```shell
 wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.8.2-linux-x86_64.tar.gz
 wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.8.2-linux-x86_64.tar.gz.sha512
 shasum -a 512 -c elasticsearch-8.8.2-linux-x86_64.tar.gz.sha512
@@ -151,7 +151,8 @@ LICENSE.txt  NOTICE.txt  README.asciidoc  bin  config  elasticsearch-8.9.0  elas
 
 
 # $IKAnalyzer.cfg.xml$
-```
+
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
 <properties>
