@@ -1,5 +1,5 @@
-﻿
-namespace JaegerWebAPI.Controllers;
+﻿namespace JaegerWebAPI.Controllers;
+
 [ValidateModel]
 [ApiController]
 [Route("API/[Controller]/[Action]/")]
