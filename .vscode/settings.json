@@ -1,5 +1,6 @@
 {
   "cSpell.words": [
+    "Girc",
     "Jeager",
     "Newtonsoft",
     "Serilog",
@@ -7,3 +8,4 @@
   ],
   "dotnet.defaultSolution": "NewSolution.sln"
 }
+
