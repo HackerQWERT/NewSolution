@@ -26,7 +26,7 @@ public class DictController : ControllerBase
         //     Value.i += 1;
         // string txt = Value.i % 2 == 0 ? "cn-99999.txt" : "test.txt";
         // logger.LogInformation(txt + ":\n");
-        var path = Path.Combine(Directory.GetCurrentDirectory(), "Dicts", "test.txt");
+        var path = Path.Combine(Directory.GetCurrentDirectory(), "Dicts", "cn-99999.txt");
 
 
         // var lines = await System.IO.File.ReadAllLinesAsync(path);

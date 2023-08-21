@@ -22,6 +22,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JsonPlay", "JsonPlay\JsonPl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ESRemoteDictServer", "ESRemoteDictServer\ESRemoteDictServer.csproj", "{40C80249-F693-45D1-BAB3-392A91632EC0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Play", "Play\Play.csproj", "{5536E66E-53CE-4B29-8CFA-AF6165702EB0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -68,6 +70,10 @@ Global
 		{40C80249-F693-45D1-BAB3-392A91632EC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{40C80249-F693-45D1-BAB3-392A91632EC0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{40C80249-F693-45D1-BAB3-392A91632EC0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5536E66E-53CE-4B29-8CFA-AF6165702EB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5536E66E-53CE-4B29-8CFA-AF6165702EB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5536E66E-53CE-4B29-8CFA-AF6165702EB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5536E66E-53CE-4B29-8CFA-AF6165702EB0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

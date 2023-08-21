@@ -23,10 +23,8 @@ curl   -k -u elastic:eGIutE2ZGircY53s30tf  -XPOST https://localhost:9200/index/_
 
 }'
 ```
-## $读取索引$
-```shell
-curl   -k -u elastic:eGIutE2ZGircY53s30tf  -XGET https://localhost:9200/index/_mapping -H 'Content-Type:application/json' 
-```
+## $读取映射$
+*`curl   -k -u elastic:eGIutE2ZGircY53s30tf  -XGET https://localhost:9200/index/_mapping -H 'Content-Type:application/json' `*
 ## $索引文档$
 
 ```shell
@@ -70,7 +68,7 @@ curl -k -u elastic:eGIutE2ZGircY53s30tf -XGET https://localhost:9200/index/_anal
 ```shell
 curl -k -u elastic:eGIutE2ZGircY53s30tf -XGET https://localhost:9200/index/_analyze -H 'Content-Type:application/json' -d'
 {
-  "field":"content",
+  "analyzer":"ik_smart",
   "text":"我 went to the store, где I bought some groceries and ein Buch."
 }
 '
@@ -183,7 +181,81 @@ curl -k -u elastic:eGIutE2ZGircY53s30tf -XGET https://localhost:9200/index/_anal
 ```
 
 ```json
-{"tokens":[{"token":"我","start_offset":0,"end_offset":1,"type":"CN_CHAR","position":0},{"token":"went","start_offset":2,"end_offset":6,"type":"ENGLISH","position":1},{"token":"store","start_offset":14,"end_offset":19,"type":"ENGLISH","position":2},{"token":"i","start_offset":25,"end_offset":26,"type":"ENGLISH","position":3},{"token":"bought","start_offset":27,"end_offset":33,"type":"ENGLISH","position":4},{"token":"some","start_offset":34,"end_offset":38,"type":"ENGLISH","position":5},{"token":"groceries","start_offset":39,"end_offset":48,"type":"ENGLISH","position":6},{"token":"ein","start_offset":53,"end_offset":56,"type":"ENGLISH","position":7},{"token":"buch.","start_offset":57,"end_offset":62,"type":"LETTER","position":8},{"token":"buch","start_offset":57,"end_offset":61,"type":"ENGLISH","position":9}]}
+{
+  "tokens": [
+    {
+      "token": "我",
+      "start_offset": 0,
+      "end_offset": 1,
+      "type": "CN_CHAR",
+      "position": 0
+    },
+    {
+      "token": "went",
+      "start_offset": 2,
+      "end_offset": 6,
+      "type": "ENGLISH",
+      "position": 1
+    },
+    {
+      "token": "store",
+      "start_offset": 14,
+      "end_offset": 19,
+      "type": "ENGLISH",
+      "position": 2
+    },
+    {
+      "token": "i",
+      "start_offset": 25,
+      "end_offset": 26,
+      "type": "ENGLISH",
+      "position": 3
+    },
+    {
+      "token": "bought",
+      "start_offset": 27,
+      "end_offset": 33,
+      "type": "ENGLISH",
+      "position": 4
+    },
+    {
+      "token": "some",
+      "start_offset": 34,
+      "end_offset": 38,
+      "type": "ENGLISH",
+      "position": 5
+    },
+    {
+      "token": "groceries",
+      "start_offset": 39,
+      "end_offset": 48,
+      "type": "ENGLISH",
+      "position": 6
+    },
+    {
+      "token": "ein",
+      "start_offset": 53,
+      "end_offset": 56,
+      "type": "ENGLISH",
+      "position": 7
+    },
+    {
+      "token": "buch.",
+      "start_offset": 57,
+      "end_offset": 62,
+      "type": "LETTER",
+      "position": 8
+    },
+    {
+      "token": "buch",
+      "start_offset": 57,
+      "end_offset": 61,
+      "type": "ENGLISH",
+      "position": 9
+    }
+  ]
+}
+
 ```
 
 
@@ -243,4 +315,128 @@ curl -k -u elastic:eGIutE2ZGircY53s30tf -XPOST https://localhost:9200/index/_sea
   }
 }
 
+```
+
+
+
+
+# $Analyzer$
+*`创建索引，同时自定义分析器，包含filter(分词库)、tokenizer(分词器)、analyzer(分析器)`*
+```batch
+curl -k -u elastic:eGIutE2ZGircY53s30tf -XPUT "https://localhost:9200/dictionary_decompound_index" -H "Content-Type: application/json" -d '{
+  "settings": {
+
+    "analysis": {
+
+      "filter": {
+        "22_char_dictionary_decompound": {
+          "type": "dictionary_decompounder",
+          "word_list_path": "analysis/A.txt",
+          "max_subword_size": 22
+        }
+      },
+
+      "analyzer": {
+        "standard_dictionary_decompound": {
+          "tokenizer": "standard",
+          "filter": ["22_char_dictionary_decompound"]
+        }
+      }
+    }
+  }
+}'
+
+```
+
+## $读取索引(索引中所有数据)$
+
+*`curl -k -XGET -u elastic:eGIutE2ZGircY53s30tf https://localhost:9200/dictionary_decompound_index/_search `*
+
+## $映射自定义分析器(只有对索引使用映射才有效应用分析器,如果没有指定，会有默认值)$
+```shell
+curl   -k -u elastic:eGIutE2ZGircY53s30tf  -XPOST https://localhost:9200/dictionary_decompound_index/_mapping -H 'Content-Type:application/json' -d'
+{
+        "properties": {
+            "content": {
+                "type": "text",
+                "analyzer": "standard_dictionary_decompound",
+                "search_analyzer": "standard_dictionary_decompound"
+            }
+        }
+
+}'
+```
+## $读取映射$
+*`curl   -k -u elastic:eGIutE2ZGircY53s30tf  -XGET https://localhost:9200/dictionary_decompound_index/_mapping -H 'Content-Type:application/json' `*
+
+
+## $分析自定义索引$
+```shell
+curl -k -u elastic:eGIutE2ZGircY53s30tf -XGET https://localhost:9200/dictionary_decompound_index/_analyze -H 'Content-Type:application/json' -d'
+{
+  "field":"content",
+  "text":"中国驻洛杉矶领事馆遭亚裔男子枪击 嫌犯已自首"
+}
+'
+```
+```shell
+curl -k -u elastic:eGIutE2ZGircY53s30tf -XGET https://localhost:9200/dictionary_decompound_index/_analyze -H 'Content-Type:application/json' -d'
+{
+  "analyzer":"standard_dictionary_decompound",
+  "text":"中国驻洛杉矶领事馆遭亚裔男子枪击 嫌犯已自首"
+}
+'
+```
+
+
+```shell
+curl -k -u elastic:eGIutE2ZGircY53s30tf -XGET https://localhost:9200/dictionary_decompound_index/_analyze -H 'Content-Type:application/json' -d'
+{
+  "tokenizer": "standard",
+  "filter": [
+    {
+      "type": "dictionary_decompounder",
+      "word_list": ["Donau", "dampf", "meer", "schiff"]
+    }
+  ],
+  "text": "Donaudampfschiff"
+}'
+```
+
+
+## $索引文档$
+
+```shell
+curl -k -u elastic:eGIutE2ZGircY53s30tf  -XPOST https://localhost:9200/dictionary_decompound_index/_create/1 -H 'Content-Type:application/json' -d'
+{
+  "tokenizer": "standard",
+  "filter": [
+    {
+      "type": "dictionary_decompounder",
+      "word_list": ["Donau", "dampf", "meer", "schiff"]
+    }
+  ],
+  "text": "Donaudampfschiff"
+}'
+
+```
+
+
+
+
+## $查询(精确索引)$
+
+```shell
+curl -k -u elastic:eGIutE2ZGircY53s30tf -XPOST https://localhost:9200/dictionary_decompound_index/_search -H 'Content-Type:application/json' -d'
+{
+    "query" : { "match" : { "content" : "中国" }},
+    "highlight" : {
+        "pre_tags" : ["<tag1>", "<tag2>"],
+        "post_tags" : ["</tag1>", "</tag2>"],
+        "fields" : {
+            "content" : {}
+        }
+    }
+}
+'
 ```

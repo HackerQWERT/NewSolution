@@ -1,13 +1,26 @@
 ﻿var services = new ServiceCollection();
 
-string path;
+string path, englishFilePath, englishTestPath, chineseTestPath;
+
 DirectoryInfo directoryInfo = new(Directory.GetCurrentDirectory());
 
 if (directoryInfo.Name == "ElasticSearch")
-
+{
     path = Path.Combine(Directory.GetCurrentDirectory(), "Logs", "log.txt");
+    englishFilePath = Path.Combine(Directory.GetCurrentDirectory(), "Dicts", "en-99999.txt");
+    englishTestPath = Path.Combine(Directory.GetCurrentDirectory(), "TestData", "Book17_en.txt");
+    chineseTestPath = Path.Combine(Directory.GetCurrentDirectory(), "TestData", "中文30w字.txt");
+
+}
 else
+{
     path = Path.Combine(Directory.GetCurrentDirectory(), "../../../Logs", "log.txt");
+    englishFilePath = Path.Combine(Directory.GetCurrentDirectory(), "../../../Dicts", "en-99999.txt");
+    englishTestPath = Path.Combine(Directory.GetCurrentDirectory(), "../../../TestData", "Book17_en.txt");
+    chineseTestPath = Path.Combine(Directory.GetCurrentDirectory(), "../../../TestData", "中文30w字.txt");
+}
+
+
 System.Console.WriteLine(path);
 
 Serilog.Log.Logger = new LoggerConfiguration()
@@ -19,62 +32,18 @@ Serilog.Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 services.AddSingleton<ILogger>(Serilog.Log.Logger);
-
+services.AddScoped<FileStyleConverter>();
+services.AddScoped<ElasticSearchService<string>>();
 // 创建服务提供程序
 var serviceProvider = services.BuildServiceProvider(true);
 
-var scope = serviceProvider.CreateAsyncScope();
+List<Task> tasks = new(){
 
-var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
-
-var settings = new ConnectionSettings(new Uri("https://localhost:9200"))
-    .BasicAuthentication("elastic", "eGIutE2ZGircY53s30tf")
-    .DefaultIndex("index"); // Replace with your credentials
-
-var client = new ElasticClient(settings);
+    // FileStyleConverter.StartAsync(serviceProvider, new FileInfo(englishFilePath)),
+    // ElasticSearchService<string>.StartAsync(serviceProvider, new FileInfo(englishTestPath),"my_custom_index"),
+    ElasticSearchService<string>.StartAsync(serviceProvider, new FileInfo(chineseTestPath),"my_custom_index")
+};
 
 
-CancellationToken cancellationToken = new();
+await Task.WhenAll(tasks);
 
-while (!cancellationToken.IsCancellationRequested)
-{
-
-    var searchResponse = client.Search<object>(s => s
-        .Index("index")
-        .Query(q => q
-            .Match(m => m
-                .Field("content")
-                .Query("？")
-            )
-        )
-        .Highlight(h => h
-            .PreTags("<tag1>", "<tag2>")
-            .PostTags("</tag1>", "</tag2>")
-            .Fields(f => f
-                .Field("content")
-            )
-        )
-    // .Size(10) // Number of documents to retrieve
-    );
-    //Natürlich, hier ist ein kurzer Satz auf Deutsch:
-    //The enigmatic artifact perplexed the intrepid archaeologist
-    if (searchResponse.IsValid)
-    {
-        foreach (var hit in searchResponse.Hits)
-        {
-            //Process the search results here
-            // hit.Source;
-            var source = hit.Source as Dictionary<string, object>;
-
-            logger.Information($"Document ID: {hit.Id}");
-            logger.Information($"Source: {source["content"]}");
-            logger.Information($"Highlight: {string.Join(", ", hit.Highlight.SelectMany(kv => kv.Value))}\n");
-        }
-    }
-    else
-    {
-        logger.Error($"Search failed: {searchResponse.DebugInformation}");
-    }
-
-    await Task.Delay(1000);
-}

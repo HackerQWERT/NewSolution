@@ -1,0 +1,207 @@
+{
+  "tokens": [
+    {
+      "token": "abaca",
+      "start_offset": 0,
+      "end_offset": 5,
+      "type": "ENGLISH",
+      "position": 0
+    },
+    {
+      "token": "rope",
+      "start_offset": 6,
+      "end_offset": 10,
+      "type": "ENGLISH",
+      "position": 1
+    },
+    {
+      "token": "abandon",
+      "start_offset": 12,
+      "end_offset": 19,
+      "type": "ENGLISH",
+      "position": 2
+    },
+    {
+      "token": "anchor",
+      "start_offset": 23,
+      "end_offset": 29,
+      "type": "ENGLISH",
+      "position": 3
+    },
+    {
+      "token": "abandon",
+      "start_offset": 31,
+      "end_offset": 38,
+      "type": "ENGLISH",
+      "position": 4
+    },
+    {
+      "token": "anchor",
+      "start_offset": 39,
+      "end_offset": 45,
+      "type": "ENGLISH",
+      "position": 5
+    },
+    {
+      "token": "abandoned",
+      "start_offset": 47,
+      "end_offset": 56,
+      "type": "ENGLISH",
+      "position": 6
+    },
+    {
+      "token": "aircraft",
+      "start_offset": 57,
+      "end_offset": 65,
+      "type": "ENGLISH",
+      "position": 7
+    },
+    {
+      "token": "abandoned",
+      "start_offset": 67,
+      "end_offset": 76,
+      "type": "ENGLISH",
+      "position": 8
+    },
+    {
+      "token": "overshoot",
+      "start_offset": 77,
+      "end_offset": 86,
+      "type": "ENGLISH",
+      "position": 9
+    },
+    {
+      "token": "abandoned",
+      "start_offset": 88,
+      "end_offset": 97,
+      "type": "ENGLISH",
+      "position": 10
+    },
+    {
+      "token": "ship.",
+      "start_offset": 98,
+      "end_offset": 103,
+      "type": "LETTER",
+      "position": 11
+    },
+    {
+      "token": "ship",
+      "start_offset": 98,
+      "end_offset": 102,
+      "type": "ENGLISH",
+      "position": 12
+    },
+    {
+      "token": "漆层脱落",
+      "start_offset": 104,
+      "end_offset": 108,
+      "type": "CN_WORD",
+      "position": 13
+    },
+    {
+      "token": "脱落",
+      "start_offset": 106,
+      "end_offset": 108,
+      "type": "CN_WORD",
+      "position": 14
+    },
+    {
+      "token": "离开编队",
+      "start_offset": 110,
+      "end_offset": 114,
+      "type": "CN_WORD",
+      "position": 15
+    },
+    {
+      "token": "离开",
+      "start_offset": 110,
+      "end_offset": 112,
+      "type": "CN_WORD",
+      "position": 16
+    },
+    {
+      "token": "开编",
+      "start_offset": 111,
+      "end_offset": 113,
+      "type": "CN_WORD",
+      "position": 17
+    },
+    {
+      "token": "编队",
+      "start_offset": 112,
+      "end_offset": 114,
+      "type": "CN_WORD",
+      "position": 18
+    },
+    {
+      "token": "离开编队",
+      "start_offset": 116,
+      "end_offset": 120,
+      "type": "CN_WORD",
+      "position": 19
+    },
+    {
+      "token": "离开",
+      "start_offset": 116,
+      "end_offset": 118,
+      "type": "CN_WORD",
+      "position": 20
+    },
+    {
+      "token": "开编",
+      "start_offset": 117,
+      "end_offset": 119,
+      "type": "CN_WORD",
+      "position": 21
+    },
+    {
+      "token": "编队",
+      "start_offset": 118,
+      "end_offset": 120,
+      "type": "CN_WORD",
+      "position": 22
+    },
+    {
+      "token": "飞行员",
+      "start_offset": 122,
+      "end_offset": 125,
+      "type": "CN_WORD",
+      "position": 23
+    },
+    {
+      "token": "飞行",
+      "start_offset": 122,
+      "end_offset": 124,
+      "type": "CN_WORD",
+      "position": 24
+    },
+    {
+      "token": "行员",
+      "start_offset": 123,
+      "end_offset": 125,
+      "type": "CN_WORD",
+      "position": 25
+    },
+    {
+      "token": "锤的尖头",
+      "start_offset": 127,
+      "end_offset": 131,
+      "type": "CN_WORD",
+      "position": 26
+    },
+    {
+      "token": "尖头",
+      "start_offset": 129,
+      "end_offset": 131,
+      "type": "CN_WORD",
+      "position": 27
+    },
+    {
+      "token": "尖锤",
+      "start_offset": 133,
+      "end_offset": 135,
+      "type": "CN_WORD",
+      "position": 28
+    }
+  ]
+}

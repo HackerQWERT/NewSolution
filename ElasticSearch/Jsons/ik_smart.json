@@ -1,0 +1,130 @@
+{
+  "tokens": [
+    {
+      "token": "abaca",
+      "start_offset": 0,
+      "end_offset": 5,
+      "type": "ENGLISH",
+      "position": 0
+    },
+    {
+      "token": "rope",
+      "start_offset": 6,
+      "end_offset": 10,
+      "type": "ENGLISH",
+      "position": 1
+    },
+    {
+      "token": "abandon",
+      "start_offset": 12,
+      "end_offset": 19,
+      "type": "ENGLISH",
+      "position": 2
+    },
+    {
+      "token": "anchor",
+      "start_offset": 23,
+      "end_offset": 29,
+      "type": "ENGLISH",
+      "position": 3
+    },
+    {
+      "token": "abandon",
+      "start_offset": 31,
+      "end_offset": 38,
+      "type": "ENGLISH",
+      "position": 4
+    },
+    {
+      "token": "anchor",
+      "start_offset": 39,
+      "end_offset": 45,
+      "type": "ENGLISH",
+      "position": 5
+    },
+    {
+      "token": "abandoned",
+      "start_offset": 47,
+      "end_offset": 56,
+      "type": "ENGLISH",
+      "position": 6
+    },
+    {
+      "token": "aircraft",
+      "start_offset": 57,
+      "end_offset": 65,
+      "type": "ENGLISH",
+      "position": 7
+    },
+    {
+      "token": "abandoned",
+      "start_offset": 67,
+      "end_offset": 76,
+      "type": "ENGLISH",
+      "position": 8
+    },
+    {
+      "token": "overshoot",
+      "start_offset": 77,
+      "end_offset": 86,
+      "type": "ENGLISH",
+      "position": 9
+    },
+    {
+      "token": "abandoned",
+      "start_offset": 88,
+      "end_offset": 97,
+      "type": "ENGLISH",
+      "position": 10
+    },
+    {
+      "token": "ship.",
+      "start_offset": 98,
+      "end_offset": 103,
+      "type": "LETTER",
+      "position": 11
+    },
+    {
+      "token": "漆层脱落",
+      "start_offset": 104,
+      "end_offset": 108,
+      "type": "CN_WORD",
+      "position": 12
+    },
+    {
+      "token": "离开编队",
+      "start_offset": 110,
+      "end_offset": 114,
+      "type": "CN_WORD",
+      "position": 13
+    },
+    {
+      "token": "离开编队",
+      "start_offset": 116,
+      "end_offset": 120,
+      "type": "CN_WORD",
+      "position": 14
+    },
+    {
+      "token": "飞行员",
+      "start_offset": 122,
+      "end_offset": 125,
+      "type": "CN_WORD",
+      "position": 15
+    },
+    {
+      "token": "锤的尖头",
+      "start_offset": 127,
+      "end_offset": 131,
+      "type": "CN_WORD",
+      "position": 16
+    },
+    {
+      "token": "尖锤",
+      "start_offset": 133,
+      "end_offset": 135,
+      "type": "CN_WORD",
+      "position": 17
+    }
+  ]
+}

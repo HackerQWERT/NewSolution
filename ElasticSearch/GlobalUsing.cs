@@ -1,5 +1,14 @@
-﻿global using Nest;
-global using System.IO;
+﻿global using System.IO;
 global using Microsoft.Extensions.DependencyInjection;
 global using Serilog;
 global using Serilog.Events;
+global using Elastic.Clients.Elasticsearch;
+global using Elastic.Clients.Elasticsearch.Analysis;
+global using Elastic.Clients.Elasticsearch.QueryDsl;
+global using Elastic.Transport;
+global using System.Diagnostics;
+global using System.Dynamic;
+global using System.Net.Sockets;
+global using System.Text;
+global using Serilog.Core;
+global using ElasticSearch.Services;
