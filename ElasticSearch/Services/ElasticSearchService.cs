@@ -1,5 +1,4 @@
-﻿using Elasticsearch.Net;
-using Nest;
+﻿using Nest;
 using CustomAnalyzer = Nest.CustomAnalyzer;
 using MappingCharFilter = Nest.MappingCharFilter;
 
@@ -10,7 +9,6 @@ public class ElasticSearchService<T>
     private readonly ILogger logger;
     // private readonly ElasticsearchClient client;
     private readonly IElasticClient nestClient;
-
     public ElasticSearchService(ILogger logger)
     {
         this.logger = logger;
@@ -19,10 +17,15 @@ public class ElasticSearchService<T>
         //     .DefaultIndex("Index")
         //     .Authentication(new BasicAuthentication("elastic", "eGIutE2ZGircY53s30tf"));
         // client = new ElasticsearchClient(settings);
+
         var settings = new ConnectionSettings(new Uri("https://localhost:9200"))
             .DefaultIndex("Index")
             .BasicAuthentication("elastic", "eGIutE2ZGircY53s30tf")
             .CertificateFingerprint("bb7754cc33e56594e4009d67086864064d25310d7d265ba2941b8fd46101288d");
+        // var settings = new ConnectionSettings(new Uri("https://localhost:9200"))
+        //     .DefaultIndex("Index")
+        //     .BasicAuthentication("elastic", "J_jUO3nGCy4afiLNJjyX")
+        //     .CertificateFingerprint("6f9c780fb45d1888525aa29677e5cbbe71d7302538fff6063cc40a13c55bd8c4");
 
         nestClient = new ElasticClient(settings);
     }
@@ -81,7 +84,7 @@ public class ElasticSearchService<T>
             {
                 try
                 {
-                    await TestSingleLineAsync(tempTestLine, "my_custom_index", "custom_phrase_analyzer");
+                    await TestSingleLineAsync(tempTestLine, indexName, "custom_phrase_analyzer");
                 }
                 catch (Exception ex)
                 {
@@ -105,12 +108,17 @@ public class ElasticSearchService<T>
         }
         await Task.WhenAll(tasks);
         stopwatch.Stop();
-        logger.Information("");
-        logger.Information($"****************************************************************************************************************************************************");
-        logger.Information($"Complete TestEsTokenizePerformanceAsync: {stopwatch.ElapsedMilliseconds}ms");
-        logger.Information($"Total: {testLines.Length}");
-        logger.Information($"Success: {testLines.Length - failCount}");
-        logger.Warning($"Fail: {failCount}");
+        System.Console.WriteLine($"****************************************************************************************************************************************************");
+        System.Console.WriteLine($"Complete TestEsTokenizePerformanceAsync: {stopwatch.ElapsedMilliseconds}ms");
+        System.Console.WriteLine($"Total: {testLines.Length}");
+        System.Console.WriteLine($"Success: {testLines.Length - failCount}");
+        System.Console.WriteLine($"Fail: {failCount}");
+        // logger.Information("");
+        // logger.Information($"****************************************************************************************************************************************************");
+        // logger.Information($"Complete TestEsTokenizePerformanceAsync: {stopwatch.ElapsedMilliseconds}ms");
+        // logger.Information($"Total: {testLines.Length}");
+        // logger.Information($"Success: {testLines.Length - failCount}");
+        // logger.Warning($"Fail: {failCount}");
 
     }
 
@@ -122,8 +130,8 @@ public class ElasticSearchService<T>
     /// <returns></returns>
     private async Task CreateIndexAsync(string indexName, string analyzerName = "ik_smart")
     {
-        logger.Information("****************************************************************************************************************************************************");
-        logger.Information($"Start CreateIndexAsync: {indexName}");
+        // logger.Information("****************************************************************************************************************************************************");
+        // logger.Information($"Start CreateIndexAsync: {indexName}");
         var createIndexRequest = new CreateIndexRequest(indexName)
         {
             Settings = new IndexSettings
@@ -162,10 +170,13 @@ public class ElasticSearchService<T>
             }
         };
 
-        await nestClient.Indices.CreateAsync(createIndexRequest);
+        var createResponse = await nestClient.Indices.CreateAsync(createIndexRequest);
 
-        // await client.IndexAsync("indexName");
-        logger.Information($"Complete CreateIndexAsync: {indexName}");
+        // if (createResponse.IsValid)
+        //     // await client.IndexAsync("indexName");
+        //     logger.Information($"Success CreateIndexAsync: {indexName}");
+        // else
+        //     logger.Error($"Fail CreateIndexAsync: {indexName}");
     }
 
 
@@ -186,7 +197,11 @@ public class ElasticSearchService<T>
         stopwatch.Start();
         // await client.IndexAsync<IndexDocument>(indexDocument);
         // await nestClient.IndexDocumentAsync(new { text = testLine });
-        // await nestClient.IndexAsync(new { text = testLine }, i => i.Index(indexName));
+
+
+        // await nestClient.IndexAsync(new { text = testLine }, i => i
+        //     .Index(indexName)
+        // );
 
         var analyzeResponse = await nestClient.Indices.AnalyzeAsync(a => a
             .Index(indexName)
@@ -194,12 +209,14 @@ public class ElasticSearchService<T>
             .Text(testLine)
         );
         stopwatch.Stop();
-        logger.Information($"Complete single line test: {testLine}\tCost: {stopwatch.ElapsedTicks * 1000000000 / Stopwatch.Frequency}ns");
-        foreach (var item in analyzeResponse.Tokens)
-        {
-            // System.Console.WriteLine($"Token: {item.Token}\tStartOffset: {item.StartOffset}\tEndOffset: {item.EndOffset}\tType: {item.Type}\n");
-            logger.Information($"Token: {item.Token}\tStartOffset: {item.StartOffset}\tEndOffset: {item.EndOffset}\tType: {item.Type}\n");
-        }
+        // logger.Information($"Complete single line test: {testLine}\tCost: {stopwatch.ElapsedTicks * 1000000000 / Stopwatch.Frequency}ns");
+
+        // foreach (var item in analyzeResponse.Tokens)
+        // {
+        //     // System.Console.WriteLine($"Token: {item.Token}\tStartOffset: {item.StartOffset}\tEndOffset: {item.EndOffset}\tType: {item.Type}\n");
+        //     logger.Information($"Token: {item.Token}\tStartOffset: {item.StartOffset}\tEndOffset: {item.EndOffset}\tType: {item.Type}\n");
+        // }
+
         // logger.Information($"Complete single line test: {indexDocument.Id}\tCost: {stopwatch.ElapsedTicks * 1000000000 / Stopwatch.Frequency}ns");
 
     }

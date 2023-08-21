@@ -40,7 +40,7 @@ var serviceProvider = services.BuildServiceProvider(true);
 List<Task> tasks = new(){
 
     // FileStyleConverter.StartAsync(serviceProvider, new FileInfo(englishFilePath)),
-    // ElasticSearchService<string>.StartAsync(serviceProvider, new FileInfo(englishTestPath),"my_custom_index"),
+    ElasticSearchService<string>.StartAsync(serviceProvider, new FileInfo(englishTestPath),"my_custom_index"),
     ElasticSearchService<string>.StartAsync(serviceProvider, new FileInfo(chineseTestPath),"my_custom_index")
 };
 
