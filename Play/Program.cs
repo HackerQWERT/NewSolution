@@ -1,14 +1,6 @@
-﻿Task.Run(
-    () =>
-    {
-        try
-        {
-            throw new Exception("test");
+﻿using System.Text;
 
-        }
-        catch (Exception ex)
-        {
-            System.Console.WriteLine(ex.Message);
-        }
-    });
-await Task.Delay(10000);
+string s = "a b bc d";
+StringBuilder stringBuilder = new(s);
+stringBuilder.Append(stringBuilder.Replace(" ", "_"));
+System.Console.WriteLine();
