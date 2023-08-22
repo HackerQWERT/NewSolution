@@ -1,4 +1,5 @@
-﻿using Nest;
+﻿using ElasticSearch.Models;
+using Nest;
 using CustomAnalyzer = Nest.CustomAnalyzer;
 using MappingCharFilter = Nest.MappingCharFilter;
 
@@ -179,8 +180,6 @@ public class ElasticSearchService<T>
         //     logger.Error($"Fail CreateIndexAsync: {indexName}");
     }
 
-
-
     /// <summary>
     /// 测试单条数据
     /// </summary>
@@ -227,4 +226,157 @@ public class ElasticSearchService<T>
     //     public string Message { get; set; }
     // }
 
+
+    //TODO 一个用户两个索引，一个分词索引返回token，一个数据索引存入token对应的翻译
+    /// <summary>
+    /// 创建用户分词索引
+    /// </summary>
+    /// <param name="userAnalyzerIndexName">用户分词索引名</param>
+    /// <param name="tokenizer">分词器</param>
+    /// <param name="mappingsPath">短语格式文件映射路径</param>
+    /// <returns></returns>
+    private async Task CreateAnalyzerIndexAsync(string userAnalyzerIndexName, string mappingsPath, string tokenizer = "ik_smart", string analyzerName = "custom_phrase_analyzer")
+    {
+        var createIndexRequest = new CreateIndexRequest(userAnalyzerIndexName)
+        {
+            Settings = new IndexSettings
+            {
+                Analysis = new Nest.Analysis
+                {
+                    CharFilters = new Nest.CharFilters
+                    {
+                        { "replaceSpaceTo_", new MappingCharFilter
+                            {
+                                MappingsPath = mappingsPath
+                            }
+                        }
+                    },
+                    Analyzers = new Nest.Analyzers
+                    {
+                        { analyzerName, new CustomAnalyzer
+                            {
+                                Tokenizer = tokenizer,
+                                CharFilter = new List<string> { "replaceSpaceTo_" }
+                            }
+                        }
+                    }
+                }
+            },
+            Mappings = new TypeMapping
+            {
+                Properties = new Properties
+                {
+                    { "text", new TextProperty
+                        {
+                            Analyzer = analyzerName
+                        }
+                    }
+                }
+            }
+        };
+        var createIndexResponse = await nestClient.Indices.CreateAsync(createIndexRequest);
+
+
+        if (createIndexResponse.IsValid)
+            // await client.IndexAsync("indexName");
+            logger.Information($"Success CreateIndexAsync: {userAnalyzerIndexName}");
+        else
+            logger.Error($"Fail CreateIndexAsync: {userAnalyzerIndexName}");
+    }
+
+    /// <summary>
+    /// 删除用户分词索引
+    /// </summary>
+    /// <param name="userAnalyzerIndexName">用户分词索引名</param>
+    /// <returns></returns>
+    private async Task DeleteAnalyzerIndexAsync(string userAnalyzerIndexName)
+    {
+
+        var deleteIndexResponse = await nestClient.Indices.DeleteAsync(userAnalyzerIndexName);
+        if (deleteIndexResponse.IsValid)
+            // await client.IndexAsync("indexName");
+            logger.Information($"Success CreateIndexAsync: {userAnalyzerIndexName}");
+        else
+            logger.Error($"Fail CreateIndexAsync: {userAnalyzerIndexName}");
+
+    }
+
+    /// <summary>
+    /// 获取分词结果
+    /// </summary>
+    /// <param name="userAnalyzerIndexName"></param>
+    /// <param name="texts"></param>
+    /// <param name="analyzerName"></param>
+    /// <returns></returns>
+    private async Task<IReadOnlyCollection<AnalyzeToken>> GetAnalyzeTokensAsync(string userAnalyzerIndexName, string texts, string analyzerName = "custom_phrase_analyzer")
+    {
+        var analyzeResponse = await nestClient.Indices.AnalyzeAsync(a => a
+            .Index(userAnalyzerIndexName)
+            .Analyzer(analyzerName)
+            .Text(texts)
+        );
+        // foreach (var item in analyzeResponse.Tokens)
+        // {
+        //     // System.Console.WriteLine($"Token: {item.Token}\tStartOffset: {item.StartOffset}\tEndOffset: {item.EndOffset}\tType: {item.Type}\n");
+        //     logger.Information($"Token: {item.Token}\tStartOffset: {item.StartOffset}\tEndOffset: {item.EndOffset}\tType: {item.Type}\n");
+        // }
+        return analyzeResponse.Tokens;
+    }
+
+
+
+
+    /// <summary>
+    /// 创建用户数据索引，默认standard分析器
+    /// </summary>
+    /// <param name="userDataIndexName">用户数据索引名</param>
+    /// <returns></returns>
+    private async Task CreateUserDataIndexAsync(string userDataIndexName)
+    {
+        var createIndexResponse = await nestClient.Indices.CreateAsync(userDataIndexName, c => c
+            .Map(m => m.AutoMap())
+        );
+        if (createIndexResponse.IsValid)
+            // await client.IndexAsync("indexName");
+            logger.Information($"Success CreateIndexAsync: {userDataIndexName}");
+        else
+            logger.Error($"Fail CreateIndexAsync: {userDataIndexName}");
+    }
+
+
+    /// <summary>
+    /// 删除用户数据索引
+    /// </summary>
+    /// <param name="userDataIndexName"></param>
+    /// <returns></returns>
+    private async Task DeleteUserDataIndexAsync(string userDataIndexName)
+    {
+
+        var deleteIndexResponse = await nestClient.Indices.DeleteAsync(userDataIndexName);
+        if (deleteIndexResponse.IsValid)
+            // await client.IndexAsync("indexName");
+            logger.Information($"Success CreateIndexAsync: {userDataIndexName}");
+        else
+            logger.Error($"Fail CreateIndexAsync: {userDataIndexName}");
+    }
+
+
+
+    private async Task InsertUserDataIndexAsync(UserDocument userDocument, string userIndexName)
+    {
+        var indexResponse = await nestClient.IndexAsync(userDocument, i => i
+            .Index(userIndexName)
+        );
+        if (indexResponse.IsValid)
+            // await client.IndexAsync("indexName");
+            logger.Information($"Success CreateIndexAsync: {userIndexName}");
+        else
+            logger.Error($"Fail CreateIndexAsync: {userIndexName}");
+    }
+
+
+
+
+
 }
+
