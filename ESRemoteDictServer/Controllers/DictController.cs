@@ -27,25 +27,23 @@ public class DictController : ControllerBase
         // string txt = Value.i % 2 == 0 ? "cn-99999.txt" : "test.txt";
         // logger.LogInformation(txt + ":\n");
         var path = Path.Combine(Directory.GetCurrentDirectory(), "Dicts", "cn-99999.txt");
-
-
-        // var lines = await System.IO.File.ReadAllLinesAsync(path);
-        // string updateText = string.Join("\n", lines);
-
         var updateText = await System.IO.File.ReadAllTextAsync(path, Encoding.UTF8);
-
         return Ok(updateText);
     }
 
+
+    [HttpHead]
+    public async Task GetEnglishMappingFileAsync()
+    {
+
+
+    }
+
     [HttpPost]
-    public async Task<IActionResult> UploadFileAsync(IFormFile file)
+    public async Task<IActionResult> UploadFileAsync()
     {
         return Ok("File uploaded successfully");
     }
-
-
-
-
 
     //"D:\C#\NewSolution\ESRemoteDictServer\Dicts\cn-99999.txt"
     //"d:\C#\NewSolution\ESRemoteDictServer\Dicts\cn-99999.txt"

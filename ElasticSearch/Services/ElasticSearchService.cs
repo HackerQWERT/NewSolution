@@ -31,6 +31,8 @@ public class ElasticSearchService<T>
         nestClient = new ElasticClient(settings);
     }
 
+
+
     /// <summary>
     /// 启动测试
     /// </summary>
@@ -53,11 +55,18 @@ public class ElasticSearchService<T>
         }
     }
 
+
+    /// <summary>
+    /// 读取测试数据
+    /// </summary>
+    /// <param name="fileInfo"></param>
+    /// <returns></returns>
     private async Task<string[]> ReadTestDataAsync(FileInfo fileInfo)
     {
         string[] lines = await System.IO.File.ReadAllLinesAsync(fileInfo.FullName, Encoding.UTF8);
         return lines;
     }
+
 
 
     /// <summary>
@@ -123,6 +132,8 @@ public class ElasticSearchService<T>
 
     }
 
+
+
     /// <summary>
     /// 创建索引
     /// </summary>
@@ -180,6 +191,8 @@ public class ElasticSearchService<T>
         //     logger.Error($"Fail CreateIndexAsync: {indexName}");
     }
 
+
+
     /// <summary>
     /// 测试单条数据
     /// </summary>
@@ -219,6 +232,8 @@ public class ElasticSearchService<T>
         // logger.Information($"Complete single line test: {indexDocument.Id}\tCost: {stopwatch.ElapsedTicks * 1000000000 / Stopwatch.Frequency}ns");
 
     }
+
+
 
     // private class IndexDocument
     // {
@@ -284,6 +299,8 @@ public class ElasticSearchService<T>
             logger.Error($"Fail CreateIndexAsync: {userAnalyzerIndexName}");
     }
 
+
+
     /// <summary>
     /// 删除用户分词索引
     /// </summary>
@@ -300,6 +317,8 @@ public class ElasticSearchService<T>
             logger.Error($"Fail CreateIndexAsync: {userAnalyzerIndexName}");
 
     }
+
+
 
     /// <summary>
     /// 获取分词结果
@@ -325,7 +344,6 @@ public class ElasticSearchService<T>
 
 
 
-
     /// <summary>
     /// 创建用户数据索引，默认standard分析器
     /// </summary>
@@ -342,6 +360,7 @@ public class ElasticSearchService<T>
         else
             logger.Error($"Fail CreateIndexAsync: {userDataIndexName}");
     }
+
 
 
     /// <summary>
@@ -362,6 +381,12 @@ public class ElasticSearchService<T>
 
 
 
+    /// <summary>
+    /// 插入用户数据索引
+    /// </summary>
+    /// <param name="userDocument"></param>
+    /// <param name="userIndexName"></param>
+    /// <returns></returns>
     private async Task InsertUserDataIndexAsync(UserDocument userDocument, string userIndexName)
     {
         var indexResponse = await nestClient.IndexAsync(userDocument, i => i
@@ -376,7 +401,75 @@ public class ElasticSearchService<T>
 
 
 
+    /// <summary>
+    /// 更新用户数据索引
+    /// </summary>
+    /// <param name="userDocument"></param>
+    /// <param name="userIndexName"></param>
+    /// <returns></returns>
+    private async Task UpdateUserDataIndexAsync(UserDocument userDocument, string userIndexName)
+    {
+        var updateResponse = await nestClient.UpdateAsync<UserDocument>(userDocument.Term, u => u
+            .Index(userIndexName)
+            .Doc(userDocument)
+        );
+        if (updateResponse.IsValid)
+            // await client.IndexAsync("indexName");
+            logger.Information($"Success CreateIndexAsync: {userIndexName}");
+        else
+            logger.Error($"Fail CreateIndexAsync: {userIndexName}");
+    }
+
+
+
+    /// <summary>
+    /// 搜索用户数据索引
+    /// </summary>
+    /// <param name="userIndexName">用户索引名</param>
+    /// <param name="termId">术语ID</param>
+    /// <returns></returns>
+    private async Task<IReadOnlyCollection<UserDocument>> SearchUserDataIndexAsync(string userIndexName, string termId)
+    {
+        var searchResponse = await nestClient.SearchAsync<UserDocument>(s => s
+            .Index(userIndexName)
+            .Query(q => q
+                .Match(m => m
+                    .Field(f => f.TermId)
+                    .Query(termId)
+                )
+            )
+        );
+        if (searchResponse.IsValid)
+        {
+            // logger.Information($"Success CreateIndexAsync: {userIndexName}");
+
+            return searchResponse.Documents;
+        }
+        // await client.IndexAsync("indexName");
+        else
+        {
+            // logger.Error($"Fail CreateIndexAsync: {userIndexName}");
+
+            return null;
+
+        }
+    }
+
+
+
+    /// <summary>
+    /// 更新英文映射文件
+    /// </summary>
+    /// <param name="updateText">新映射</param>
+    /// <param name="filePath">映射路径</param>
+    /// <returns></returns>
+    private async Task UpdateEnglishMappingFileAsync(string[] updateText, string filePath)
+    {
+        await System.IO.File.WriteAllLinesAsync(filePath, updateText, Encoding.UTF8);
+    }
 
 
 }
+
+
 

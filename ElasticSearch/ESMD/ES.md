@@ -35,7 +35,7 @@ The following checks were performed on each of these signatures:
 
 `docker network create elastic`
 
-## 为 Elasticsearch 和 Kibana 创建新的 docker 网络
+## 为 启动docker
 
 `docker run --name es01 --net elastic -p 9200:9200 -it docker.elastic.co/elasticsearch/elasticsearch:8.9.0`
 
@@ -196,3 +196,82 @@ $用户可以在这里配置远程扩展停止词字典$
 可以将需自动更新的热词放在一个 *`UTF-8`* 编码的 .txt 文件里，放在 nginx 或其他简易 http server 下，当 .txt 文件修改时，http server 会在客户端请求该文件时自动返回相应的 Last-Modified 和 ETag。可以另外做一个工具来从业务系统提取相关词汇，并更新这个 .txt 文件。
 
 have fun.
+
+
+
+
+# Linux Es
+
+
+## 安装Es
+```shell
+wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.8.2-linux-x86_64.tar.gz
+wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.8.2-linux-x86_64.tar.gz.sha512
+shasum -a 512 -c elasticsearch-8.8.2-linux-x86_64.tar.gz.sha512 
+tar -xzf elasticsearch-8.8.2-linux-x86_64.tar.gz
+cd elasticsearch-8.8.2/ 
+```
+
+# Elasticsearch 安全配置信息
+
+Elasticsearch 的安全功能已经自动配置完成:
+
+- ✅ 启用了认证
+- ✅ 集群连接被加密
+
+### elastic 用户密码
+
+#### 8.8.2
+
+`L*QEKkMyg+AV7CPe0Drj`
+
+可以使用 `bin/elasticsearch-reset-password -u elastic` 重置密码。
+
+### HTTP CA 证书 SHA256 指纹
+
+#### 8.8.2
+
+`0763eb6ca7a527b19db69ddf73f5e1de2d7c42847270d9cf25f2cd6f5d8370e8`
+### 复制证书
+
+`docker cp es01:/usr/share/elasticsearch/config/certs/http_ca.crt .`
+
+### 配置 Kibana 令牌
+`bin/elasticsearch-create-enrollment-token -s kibana`
+#### 8.8.2
+
+```
+eyJ2ZXIiOiI4LjguMiIsImFkciI6WyIxNzIuMjAuMjE4LjE1MDo5MjAwIl0sImZnciI6IjA3NjNlYjZjYTdhNTI3YjE5ZGI2OWRkZjczZjVlMWRlMmQ3YzQyODQ3MjcwZDljZjI1ZjJjZDZmNWQ4MzcwZTgiLCJrZXkiOiJHN0ZSSzRvQnVrSkxXZDVKRHp6SDpLcjg1UmF2TVRDQ3JaR2pUQUl3aEFnIn0=
+```
+
+### ℹ️配置其他节点加入该集群：
+`• 在此节点上：`
+
+   `⁠ 使用“bin/elasticsearch-create-enrollment-token -s node”创建注册令牌。`
+
+   `取消注释 config/elasticsearch.yml 末尾的 Transport.host 设置。`
+
+   ⁠`重新启动Elasticsearch。`
+
+`• 在其他节点上：`
+
+   `‐ 使用您生成的注册令牌，通过“bin/elasticsearch --enrollment-token <token>”启动 Elasticsearch。`
+
+
+## 安装 Kibana Linux 64-bit package
+
+```SHELL
+curl -O https://artifacts.elastic.co/downloads/kibana/kibana-8.8.2-linux-x86_64.tar.gz
+curl https://artifacts.elastic.co/downloads/kibana/kibana-8.8.2-linux-x86_64.tar.gz.sha512 | shasum -a 512 -c - 
+tar -xzf kibana-8.8.2-linux-x86_64.tar.gz
+cd kibana-8.8.2/ 
+```
+
+## 安装 Kibana  Darwin package
+
+```shell
+curl -O https://artifacts.elastic.co/downloads/kibana/kibana-8.8.2-darwin-x86_64.tar.gz
+curl https://artifacts.elastic.co/downloads/kibana/kibana-8.8.2-darwin-x86_64.tar.gz.sha512 | shasum -a 512 -c - 
+tar -xzf kibana-8.8.2-darwin-x86_64.tar.gz
+cd kibana-8.8.2/ 
+```
