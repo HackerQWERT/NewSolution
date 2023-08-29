@@ -173,7 +173,7 @@ LICENSE.txt  NOTICE.txt  README.asciidoc  bin  config  elasticsearch-8.9.0  elas
 # $ES热更新$
 ```
 热更新 IK 分词使用方法
-目前该插件支持热更新 IK 分词，通过上文在 IK 配置文件中提到的如下配置
+目前该插件支持热更新 IK 分词，oklolk通过上文在 IK 配置文件中提到的如下配置
 ```
 
 $用户可以在这里配置远程扩展字典$*

@@ -1,7 +1,7 @@
-﻿using OpenCvSharp;
-using CV2.PDF;
+﻿using CV2.PDF;
 using CV2.CV;
 
+using OpenCvSharp;
 
 
 
@@ -11,8 +11,8 @@ FileInfo pdfFileInfo = new FileInfo(pdfFilePath);
 DirectoryInfo pdfImagesDirectoryInfo = new DirectoryInfo(pdfImagesPath);
 PDF.ConvertPDFToImage(pdfFileInfo, pdfImagesDirectoryInfo);
 
-string slicedpicturesFilePath = @"C:\Users\syz\Desktop\Slicedpictures";
-DirectoryInfo slicedpicturesDirectoryInfo = new DirectoryInfo(slicedpicturesFilePath);
+string slicedPicturesFilePath = @"C:\Users\syz\Desktop\Slicedpictures";
+DirectoryInfo slicedPicturesDirectoryInfo = new DirectoryInfo(slicedPicturesFilePath);
 
 int index = 0;
 foreach (var pdfImage in pdfImagesDirectoryInfo.GetFiles())
@@ -23,6 +23,7 @@ foreach (var pdfImage in pdfImagesDirectoryInfo.GetFiles())
         Console.WriteLine(pdfImage.FullName + ":\tEmpty");
         continue;
     }
+    //TODO 修改切割比例 
     string ratio = "1:1";
 
     var images = image.VerticalLineSlicesWithRatio(ratio);
@@ -33,7 +34,7 @@ foreach (var pdfImage in pdfImagesDirectoryInfo.GetFiles())
 
         Cv2.Resize(kvp.Value, tImage, new Size(350, 1000));
         Cv2.ImShow("Image", tImage);  // Show the cropped image
-        string outImage = slicedpicturesDirectoryInfo.FullName + "\\" + index + ".png";
+        string outImage = slicedPicturesDirectoryInfo.FullName + "\\" + index + ".png";
         Cv2.ImWrite(outImage, kvp.Value);
         Console.WriteLine("保存图片" + outImage);
         index++;
