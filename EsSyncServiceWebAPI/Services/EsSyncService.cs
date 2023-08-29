@@ -19,15 +19,6 @@ public class EsSyncService : BackgroundService
 
     private IConfiguration Configuration { get; set; }
 
-    public static async Task StartAsync(IServiceProvider serviceProvider)
-    {
-        var s = serviceProvider.CreateAsyncScope().ServiceProvider.GetRequiredService<EsSyncService>();
-
-        
-    }
-
-
-
     public EsSyncService(IServiceProvider serviceProvider, IConfiguration configuration)
     {
 
@@ -87,6 +78,7 @@ public class EsSyncService : BackgroundService
         {
             var updatedData = await mysqlDbContext.MemoryItems
                 .Where(x => x.UpdateTime > LastUpdateTime && x.UpdateTime < DateTime.Now)
+                .OrderBy(x => x.Id)
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
