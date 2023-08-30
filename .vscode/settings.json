@@ -1,10 +1,12 @@
 {
   "cSpell.words": [
     "appsettings",
+    "esontest",
     "Girc",
     "Jeager",
     "MVCC",
     "Newtonsoft",
+    "oldguids",
     "Serilog",
     "xpack"
   ],

@@ -1,9 +1,6 @@
 ﻿using System.Data;
-using System.Diagnostics;
 using EsSyncService.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using MySqlConnector;
 using Nest;
 
 namespace EsSyncService.Services;
@@ -15,7 +12,7 @@ public class EsSyncService : BackgroundService
 
     public IElasticClient NestClient { get; set; }
 
-    private DateTime LastUpdateTime { get; set; } = default;
+    private DateTime LastUpdateTime { get; set; } = DateTime.UtcNow;
 
     private IConfiguration Configuration { get; set; }
 
@@ -32,13 +29,15 @@ public class EsSyncService : BackgroundService
                    .BasicAuthentication(Configuration.GetValue<string>("Elasticsearch:Username"), Configuration.GetValue<string>("Elasticsearch:Password"))
                    .CertificateFingerprint(Configuration.GetValue<string>("Elasticsearch:CertificateFingerprint"));
 
-
         NestClient = new ElasticClient(settings);
+
     }
 
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        var scope = ServiceProvider.CreateAsyncScope();
+        MysqlDbContext mysqlDbContext = scope.ServiceProvider.GetRequiredService<MysqlDbContext>();
 
         var isExited = await IndexExistsAsync(Configuration.GetValue<string>("Elasticsearch:Index")!);
         if (!isExited)
@@ -48,27 +47,29 @@ public class EsSyncService : BackgroundService
         {
             try
             {
-                await UpdateEsDataAsync(Configuration.GetValue<string>("Elasticsearch:Index")!);
+                await UpdateEsDataAsync(Configuration.GetValue<string>("Elasticsearch:Index")!, mysqlDbContext);
             }
             catch (Exception ex)
             {
                 System.Console.WriteLine(ex.Message);
             }
 
-            await Task.Delay(TimeSpan.FromMinutes(60));
+            await Task.Delay(TimeSpan.FromSeconds(10));
         }
     }
+    public override async Task StopAsync(CancellationToken stoppingToken)
+    {
+        await base.StopAsync(stoppingToken);
+    }
+
+
 
     /// <summary>
     /// 从mysql中获取更新的或插入的数据
     /// </summary>
     /// <returns></returns>
-    public async IAsyncEnumerable<List<Models.MemoryItem>> GetUpdatedDataFromMysqlAsync()
+    public async IAsyncEnumerable<List<Models.MemoryItem>> GetUpdatedDataFromMysqlAsync(MysqlDbContext mysqlDbContext)
     {
-        var scope = ServiceProvider.CreateAsyncScope();
-
-        var mysqlDbContext = scope.ServiceProvider.GetRequiredService<MysqlDbContext>();
-
         using var transaction = await mysqlDbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
         var pageSize = 1000;
@@ -76,8 +77,10 @@ public class EsSyncService : BackgroundService
 
         while (true)
         {
+            System.Console.WriteLine(LastUpdateTime);
+
             var updatedData = await mysqlDbContext.MemoryItems
-                .Where(x => x.UpdateTime > LastUpdateTime && x.UpdateTime < DateTime.Now)
+                .Where(x => x.UpdateTime > LastUpdateTime && x.UpdateTime < DateTime.UtcNow)
                 .OrderBy(x => x.Id)
                 .Skip(pageIndex * pageSize)
                 .Take(pageSize)
@@ -102,14 +105,13 @@ public class EsSyncService : BackgroundService
     /// 更新es中的数据
     /// </summary>
     /// <returns></returns>
-    public async Task UpdateEsDataAsync(string indexName)
+    public async Task UpdateEsDataAsync(string indexName, MysqlDbContext mysqlDbContext)
     {
-        var scope = ServiceProvider.CreateAsyncScope();
 
         List<Task> tasks = new List<Task>();
-        var runTime = DateTime.Now;
+        var runTime = DateTime.UtcNow;
 
-        await foreach (var updatedData in GetUpdatedDataFromMysqlAsync())
+        await foreach (var updatedData in GetUpdatedDataFromMysqlAsync(mysqlDbContext))
         {
             foreach (var document in updatedData)
             {
@@ -124,8 +126,17 @@ public class EsSyncService : BackgroundService
 
                     if (updateResponse.Result == Nest.Result.Updated)
                         System.Console.WriteLine($"更新成功，Id:{tempDocument.Id}");
-                    else
-                        System.Console.WriteLine($"更新失败，Id:{tempDocument.Id}");
+                    else if (updateResponse.Result == Nest.Result.Created)
+                        System.Console.WriteLine($"创建成功，Id:{tempDocument.Id}");
+                    else if (updateResponse.Result == Nest.Result.Noop)
+                        System.Console.WriteLine($"无需更新，Id:{tempDocument.Id}");
+                    else if (updateResponse.Result == Nest.Result.NotFound)
+                        System.Console.WriteLine($"未找到，Id:{tempDocument.Id}");
+                    else if (updateResponse.Result == Nest.Result.Error)
+                    {
+                        System.Console.WriteLine($"更新/创建失败，Id:{tempDocument.Id}");
+                        System.Console.WriteLine(updateResponse.DebugInformation);
+                    }
                 }));
             }
         }

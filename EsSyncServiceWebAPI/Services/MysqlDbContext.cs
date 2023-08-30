@@ -1,5 +1,6 @@
 ﻿using EsSyncService.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 
 namespace EsSyncService.Services;
@@ -25,7 +26,9 @@ public class MysqlDbContext : DbContext
             // 配置数据库连接
             var connectionString = Configuration.GetConnectionString("MysqlConnection");
             var serverVersion = ServerVersion.AutoDetect(connectionString);
-            optionsBuilder.UseMySql(connectionString, serverVersion);
+            optionsBuilder
+                        .UseMySql(connectionString, serverVersion)
+                        .LogTo(_ => { });
         }
     }
 
