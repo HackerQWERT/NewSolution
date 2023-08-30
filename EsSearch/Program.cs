@@ -15,7 +15,7 @@ var searchResponse = await NestClient.SearchAsync<MemoryItem>(s => s
     .Query(q => q
         .Term(t => t
             .Field(f => f.Id)
-            .Value(111111112043210469)
+            .Value(111111111921835511)
         )
     )
 );

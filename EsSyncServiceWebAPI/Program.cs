@@ -8,7 +8,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<MysqlDbContext>();
 builder.Services.AddSingleton<IConfiguration>(builder.Configuration);
-builder.Services.AddHostedService<EsSyncService.Services.EsSyncService>();
+builder.Services.AddHostedService<EsTightlySyncService>();
 
 
 

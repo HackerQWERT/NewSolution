@@ -28,7 +28,7 @@ while (true)
 
     var s = await mysqlDbContext.SaveChangesAsync();
 
-    System.Console.WriteLine(s);
+    System.Console.WriteLine(DateTime.UtcNow.ToString() + "\t" + s + "\t" + memoryItem.Id);
 
     await Task.Delay(5000);
 }
