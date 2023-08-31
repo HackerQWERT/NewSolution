@@ -37,7 +37,7 @@ public class EsTightlySyncService : BackgroundService
     /// <returns></returns>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var scope = ServiceProvider.CreateAsyncScope();
+        using var scope = ServiceProvider.CreateAsyncScope();
         MysqlDbContext mysqlDbContext = scope.ServiceProvider.GetRequiredService<MysqlDbContext>();
 
         var isExited = await IndexExistsAsync(Configuration.GetValue<string>("Elasticsearch:Index")!);
@@ -126,32 +126,75 @@ public class EsTightlySyncService : BackgroundService
         {
             if (updatedData.Count == 0)
                 System.Console.WriteLine("没有数据");
-            foreach (var document in updatedData)
-            {
-                var tempDocument = document;
-                // tasks.Add(Task.Run(async () =>
-                // {
-                var updateResponse = await NestClient.UpdateAsync<MemoryItem>(tempDocument.Id, u => u
-                    .Index(indexName)
-                    .DocAsUpsert(true)
-                    .Doc(tempDocument)
-                );
+            var tempUpdatedData = updatedData;
 
-                if (updateResponse.Result == Nest.Result.Updated)
-                    System.Console.WriteLine($"更新成功，Id:{tempDocument.Id}");
-                else if (updateResponse.Result == Nest.Result.Created)
-                    System.Console.WriteLine($"创建成功，Id:{tempDocument.Id}");
-                else if (updateResponse.Result == Nest.Result.Noop)
-                    System.Console.WriteLine($"无需更新，Id:{tempDocument.Id}");
-                else if (updateResponse.Result == Nest.Result.NotFound)
-                    System.Console.WriteLine($"未找到，Id:{tempDocument.Id}");
-                else if (updateResponse.Result == Nest.Result.Error)
+            tasks.Add(
+                Task.Run(async () =>
                 {
-                    System.Console.WriteLine($"更新/创建失败，Id:{tempDocument.Id}");
-                    System.Console.WriteLine(updateResponse.DebugInformation);
-                }
-                // }));
-            }
+                    var bulkResponse = await NestClient.BulkAsync(b => b
+                        .Index(indexName)
+                        .UpdateMany<MemoryItem>(tempUpdatedData, (u, d) => u
+                            .Id(d.Id)
+                            .DocAsUpsert(true)
+                            .Doc(d)
+                        )
+                    );
+                    bulkResponse.Items.ToList().ForEach(x =>
+                    {
+                        if (x.Result == "updated")
+                            System.Console.WriteLine($"更新成功，Id:{x.Id}");
+                        else if (x.Result == "created")
+                            System.Console.WriteLine($"创建成功，Id:{x.Id}");
+                        else if (x.Result == "deleted")
+                            System.Console.WriteLine($"删除成功，Id:{x.Id}");
+                        else if (x.Result == "noop")
+                            System.Console.WriteLine($"无需更新，Id:{x.Id}");
+                        else if (x.Result == "not_found")
+                            System.Console.WriteLine($"未找到，Id:{x.Id}");
+                        else if (x.Result == "error")
+                        {
+                            System.Console.WriteLine($"更新/创建失败，Id:{x.Id}");
+                            System.Console.WriteLine(x.Error.Reason);
+                        }
+                    });
+                }));
+            // bulkResponse.ItemsWithErrors
+            //                 .ToList()
+            //                 .ForEach(x =>
+            //                 {
+            //                     System.Console.WriteLine($"更新/创建失败，Id:{x.Id}");
+            //                     System.Console.WriteLine(x.Error.Reason);
+            //                 });
+
+
+            // foreach (var document in updatedData)
+            // {
+            //     var tempDocument = document;
+            //     tasks.Add(Task.Run(async () =>
+            //     {
+            //         var updateResponse = await NestClient.UpdateAsync<MemoryItem>(tempDocument.Id, u => u
+            //             .Index(indexName)
+            //             .DocAsUpsert(true)
+            //             .Doc(tempDocument)
+            //         );
+
+            //         if (updateResponse.Result == Nest.Result.Updated)
+            //             System.Console.WriteLine($"更新成功，Id:{tempDocument.Id}");
+            //         else if (updateResponse.Result == Nest.Result.Created)
+            //             System.Console.WriteLine($"创建成功，Id:{tempDocument.Id}");
+            //         else if (updateResponse.Result == Nest.Result.Noop)
+            //             System.Console.WriteLine($"无需更新，Id:{tempDocument.Id}");
+            //         else if (updateResponse.Result == Nest.Result.NotFound)
+            //             System.Console.WriteLine($"未找到，Id:{tempDocument.Id}");
+            //         else if (updateResponse.Result == Nest.Result.Error)
+            //         {
+            //             System.Console.WriteLine($"更新/创建失败，Id:{tempDocument.Id}");
+            //             System.Console.WriteLine(updateResponse.DebugInformation);
+            //         }
+            //     }));
+            // }
+
+
         }
         await Task.WhenAll(tasks);
 
@@ -200,6 +243,9 @@ public class EsTightlySyncService : BackgroundService
     /// <returns></returns>
     private async Task<DateTime> ReadLastUpdateTimeInEsAsync(string indexName)
     {
+        var isIndexExist = await IndexExistsAsync(indexName);
+        if (!isIndexExist)
+            await CreateIndexAsync(indexName);
 
         var searchResponse = await NestClient.SearchAsync<LastUpdateTimeIndexDocument>(s => s
             .Index(indexName)
@@ -210,9 +256,9 @@ public class EsTightlySyncService : BackgroundService
 
         // 检查是否有匹配的结果
         var lastUpdateTimeIndexDocument = searchResponse.Documents.FirstOrDefault();
-        System.Console.WriteLine(lastUpdateTimeIndexDocument!.LastUpdateTime);
-        return lastUpdateTimeIndexDocument.LastUpdateTime;
+        // System.Console.WriteLine(lastUpdateTimeIndexDocument.LastUpdateTime);
 
+        return lastUpdateTimeIndexDocument?.LastUpdateTime ?? default;
 
         // 获取第一个匹配的文档
         // 输出文档的内容

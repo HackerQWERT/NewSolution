@@ -7,7 +7,6 @@ public class EsLooseSyncService : BackgroundService
 
     public IElasticClient NestClient { get; set; }
 
-    private DateTime LastUpdateTime { get; set; } = DateTime.UtcNow;
 
     private IConfiguration Configuration { get; set; }
 
@@ -26,10 +25,14 @@ public class EsLooseSyncService : BackgroundService
 
     }
 
+    /// <summary>
+    /// 重写启动方法
+    /// </summary>
+    /// <param name="stoppingToken"></param>
+    /// <returns></returns>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-
-        var scope = ServiceProvider.CreateAsyncScope();
+        using var scope = ServiceProvider.CreateAsyncScope();
         MysqlDbContext mysqlDbContext = scope.ServiceProvider.GetRequiredService<MysqlDbContext>();
 
         var isExited = await IndexExistsAsync(Configuration.GetValue<string>("Elasticsearch:Index")!);
@@ -38,13 +41,18 @@ public class EsLooseSyncService : BackgroundService
 
         while (!stoppingToken.IsCancellationRequested)
         {
+            System.Console.WriteLine($"开始修补同步数据到ES，时间：{DateTime.UtcNow}");
+            int totalCount = 0;
+            int successCount = 0;
+            DateTime startTime = DateTime.UtcNow;
+
             using var transaction = await mysqlDbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
 
             var pageSize = 1000;
             var pageIndex = 0;
             List<Task> tasks = new();
 
-            while (true)
+            while (!stoppingToken.IsCancellationRequested)
             {
 
                 var data = await mysqlDbContext.MemoryItems
@@ -68,9 +76,12 @@ public class EsLooseSyncService : BackgroundService
                         var isInEs = await IsMysqlSingleDataInESAsync(Configuration.GetValue<string>("Elasticsearch:Index")!, item.Id);
                         if (!isInEs)
                         {
+                            totalCount++;
                             var indexResponse = await NestClient.IndexDocumentAsync(item);
                             if (indexResponse.IsValid)
                             {
+                                successCount++;
+
                                 System.Console.WriteLine($"索引{Configuration.GetValue<string>("Elasticsearch:Index")!}修补数据成功，id为{item.Id}");
                             }
                             else
@@ -84,13 +95,31 @@ public class EsLooseSyncService : BackgroundService
 
             }
             await Task.WhenAll(tasks);
-
+            DateTime endTime = DateTime.UtcNow;
+            System.Console.WriteLine($"结束修补同步数据到ES，时间：{endTime} 耗时：{(endTime - startTime).TotalSeconds}秒");
+            System.Console.WriteLine($"共修补{totalCount}条数据，成功{successCount}条，失败{totalCount - successCount}条");
             await Task.Delay(TimeSpan.FromHours(Configuration.GetValue<int>("EsLooseSyncServiceHours")));
 
         }
     }
 
+    /// <summary>
+    /// 重写停止方法
+    /// </summary>
+    /// <param name="stoppingToken"></param>
+    /// <returns></returns>
+    public override async Task StopAsync(CancellationToken stoppingToken)
+    {
+        await base.StopAsync(stoppingToken);
+    }
 
+
+    /// <summary>
+    /// 判断单条数据是否在ES中
+    /// </summary>
+    /// <param name="indexName"></param>
+    /// <param name="id"></param>
+    /// <returns></returns>
     private async Task<bool> IsMysqlSingleDataInESAsync(string indexName, Int64 id)
     {
         var searchResponse = await NestClient.SearchAsync<MemoryItem>(s => s
@@ -115,6 +144,7 @@ public class EsLooseSyncService : BackgroundService
     /// <summary>
     /// 判断索引是否存在
     /// </summary>
+    /// 
     /// <param name="indexName"></param>
     /// <returns></returns>
     private async Task<bool> IndexExistsAsync(string indexName)
