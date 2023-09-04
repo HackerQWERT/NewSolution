@@ -37,17 +37,19 @@ public class EsTightlySyncService : BackgroundService
     /// <returns></returns>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var scope = ServiceProvider.CreateAsyncScope();
-        MysqlDbContext mysqlDbContext = scope.ServiceProvider.GetRequiredService<MysqlDbContext>();
 
-        var isExited = await IndexExistsAsync(Configuration.GetValue<string>("Elasticsearch:Index")!);
-        if (!isExited)
-            await CreateIndexAsync(Configuration.GetValue<string>("Elasticsearch:Index")!);
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
+                using var scope = ServiceProvider.CreateAsyncScope();
+                MysqlDbContext mysqlDbContext = scope.ServiceProvider.GetRequiredService<MysqlDbContext>();
+
+                var isExited = await IndexExistsAsync(Configuration.GetValue<string>("Elasticsearch:Index")!);
+                if (!isExited)
+                    await CreateIndexAsync(Configuration.GetValue<string>("Elasticsearch:Index")!);
+
                 await UpdateEsDataAsync(Configuration.GetValue<string>("Elasticsearch:Index")!, mysqlDbContext);
             }
             catch (Exception ex)

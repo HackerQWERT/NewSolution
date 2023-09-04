@@ -32,73 +32,153 @@ public class EsLooseSyncService : BackgroundService
     /// <returns></returns>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        using var scope = ServiceProvider.CreateAsyncScope();
-        MysqlDbContext mysqlDbContext = scope.ServiceProvider.GetRequiredService<MysqlDbContext>();
-
-        var isExited = await IndexExistsAsync(Configuration.GetValue<string>("Elasticsearch:Index")!);
-        if (!isExited)
-            await CreateIndexAsync(Configuration.GetValue<string>("Elasticsearch:Index")!);
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            System.Console.WriteLine($"开始修补同步数据到ES，时间：{DateTime.UtcNow}");
-            int totalCount = 0;
-            int successCount = 0;
-            DateTime startTime = DateTime.UtcNow;
-
-            using var transaction = await mysqlDbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
-
-            var pageSize = 1000;
-            var pageIndex = 0;
-            List<Task> tasks = new();
-
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
+                using var scope = ServiceProvider.CreateAsyncScope();
+                MysqlDbContext mysqlDbContext = scope.ServiceProvider.GetRequiredService<MysqlDbContext>();
+                var semaphoreSlim = new SemaphoreSlim(1, 1);
 
-                var data = await mysqlDbContext.MemoryItems
-                    .OrderBy(x => x.Id)
-                    .Skip(pageIndex * pageSize)
-                    .Take(pageSize)
-                    .ToListAsync();
+                var isExited = await IndexExistsAsync(Configuration.GetValue<string>("Elasticsearch:Index")!);
+                if (!isExited)
+                    await CreateIndexAsync(Configuration.GetValue<string>("Elasticsearch:Index")!);
 
-                if (data.Count == 0)
+                System.Console.WriteLine($"开始修补同步数据到ES，时间：{DateTime.UtcNow}");
+                int totalCount = 0;
+                int failedCount = 0;
+                DateTime startTime = DateTime.UtcNow;
+
+                using var transaction = await mysqlDbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+
+                var pageSize = 1000;
+                var pageIndex = 0;
+                List<Task> tasks = new();
+
+                while (!stoppingToken.IsCancellationRequested)
                 {
-                    break;
-                }
-                pageIndex++;
 
-                foreach (var item in data)
-                {
-                    var tempItem = item;
-                    tasks.Add(Task.Run(async () =>
+                    var data = await mysqlDbContext.MemoryItems
+                        .OrderBy(x => x.Id)
+                        .Skip(pageIndex * pageSize)
+                        .Take(pageSize)
+                        .ToListAsync();
+
+                    if (data.Count == 0)
                     {
+                        break;
+                    }
+                    pageIndex++;
 
-                        var isInEs = await IsMysqlSingleDataInESAsync(Configuration.GetValue<string>("Elasticsearch:Index")!, item.Id);
-                        if (!isInEs)
+                    foreach (var item in data)
+                    {
+                        var tempItem = item;
+                        tasks.Add(Task.Run(async () =>
                         {
-                            totalCount++;
-                            var indexResponse = await NestClient.IndexDocumentAsync(item);
-                            if (indexResponse.IsValid)
-                            {
-                                successCount++;
 
-                                System.Console.WriteLine($"索引{Configuration.GetValue<string>("Elasticsearch:Index")!}修补数据成功，id为{item.Id}");
+                            var searchResponse = await IsMysqlSingleDataInESAsync(Configuration.GetValue<string>("Elasticsearch:Index")!, item.Id);
+
+                            if (searchResponse.IsValid && searchResponse.Documents.Any())
+                            {
+                                if (searchResponse.Documents.FirstOrDefault()!.UpdateTime != item.UpdateTime)
+                                {
+                                    try
+                                    {
+                                        await semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(10));
+                                        totalCount++;
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        System.Console.WriteLine(ex.Message);
+                                    }
+                                    finally
+                                    {
+                                        semaphoreSlim.Release();
+                                    }
+                                    var indexResponse = await NestClient.IndexDocumentAsync(item);
+                                    if (indexResponse.IsValid)
+                                    {
+                                        System.Console.WriteLine($"索引{Configuration.GetValue<string>("Elasticsearch:Index")!}修补更新数据成功，id为{item.Id}");
+                                    }
+                                    else
+                                    {
+                                        try
+                                        {
+                                            await semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(10));
+
+                                            failedCount++;
+
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            System.Console.WriteLine(ex.Message);
+                                        }
+                                        finally
+                                        {
+                                            semaphoreSlim.Release();
+                                        }
+                                        System.Console.WriteLine($"索引{Configuration.GetValue<string>("Elasticsearch:Index")!}修补更新数据失败，id为{item.Id}\nReason: {indexResponse.DebugInformation}");
+
+                                    }
+                                }
                             }
                             else
                             {
-                                System.Console.WriteLine($"索引{Configuration.GetValue<string>("Elasticsearch:Index")!}修补数据失败，id为{item.Id}\nReason: {indexResponse.DebugInformation}");
+                                try
+                                {
+                                    await semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(10));
+                                    totalCount++;
+                                }
+                                catch (Exception ex)
+                                {
+                                    System.Console.WriteLine(ex.Message);
+                                }
+                                finally
+                                {
+                                    semaphoreSlim.Release();
+                                }
+                                var indexResponse = await NestClient.IndexDocumentAsync(item);
+                                if (indexResponse.IsValid)
+                                {
+                                    System.Console.WriteLine($"索引{Configuration.GetValue<string>("Elasticsearch:Index")!}修补插入数据成功，id为{item.Id}");
+                                }
+                                else
+                                {
+                                    try
+                                    {
+                                        await semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(10));
+
+                                        failedCount++;
+
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        System.Console.WriteLine(ex.Message);
+                                    }
+                                    finally
+                                    {
+                                        semaphoreSlim.Release();
+                                    }
+
+                                    System.Console.WriteLine($"索引{Configuration.GetValue<string>("Elasticsearch:Index")!}修补插入数据失败，id为{item.Id}\nReason: {indexResponse.DebugInformation}");
+                                }
 
                             }
-                        }
-                    }));
-                }
+                        }));
+                    }
 
+                }
+                await Task.WhenAll(tasks);
+                DateTime endTime = DateTime.UtcNow;
+                System.Console.WriteLine($"结束修补同步数据到ES，时间：{endTime} 耗时：{(endTime - startTime).TotalSeconds}秒");
+                System.Console.WriteLine($"共修补{totalCount}条数据，成功{totalCount - failedCount}条，失败{failedCount}条");
+                await Task.Delay(TimeSpan.FromHours(Configuration.GetValue<int>("EsLooseSyncServiceHours")));
             }
-            await Task.WhenAll(tasks);
-            DateTime endTime = DateTime.UtcNow;
-            System.Console.WriteLine($"结束修补同步数据到ES，时间：{endTime} 耗时：{(endTime - startTime).TotalSeconds}秒");
-            System.Console.WriteLine($"共修补{totalCount}条数据，成功{successCount}条，失败{totalCount - successCount}条");
-            await Task.Delay(TimeSpan.FromHours(Configuration.GetValue<int>("EsLooseSyncServiceHours")));
+            catch (Exception ex)
+            {
+                System.Console.WriteLine(ex.Message);
+            }
 
         }
     }
@@ -120,7 +200,7 @@ public class EsLooseSyncService : BackgroundService
     /// <param name="indexName"></param>
     /// <param name="id"></param>
     /// <returns></returns>
-    private async Task<bool> IsMysqlSingleDataInESAsync(string indexName, Int64 id)
+    private async Task<ISearchResponse<MemoryItem>> IsMysqlSingleDataInESAsync(string indexName, Int64 id)
     {
         var searchResponse = await NestClient.SearchAsync<MemoryItem>(s => s
             .Query(q => q
@@ -130,12 +210,12 @@ public class EsLooseSyncService : BackgroundService
                 )
             )
         );
-
-        // 检查是否有匹配的结果
-        if (searchResponse.IsValid && searchResponse.Documents.Any())
-            return true;
-        else
-            return false;
+        return searchResponse;
+        // // 检查是否有匹配的结果
+        // if (searchResponse.IsValid && searchResponse.Documents.Any())
+        //     return true;
+        // else
+        //     return false;
 
     }
 
