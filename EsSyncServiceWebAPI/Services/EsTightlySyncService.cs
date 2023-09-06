@@ -37,8 +37,6 @@ public class EsTightlySyncService : BackgroundService
     /// <returns></returns>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-
-
         while (!stoppingToken.IsCancellationRequested)
         {
             try

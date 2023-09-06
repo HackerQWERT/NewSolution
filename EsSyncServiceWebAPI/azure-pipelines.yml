@@ -1,0 +1,50 @@
+name: $(Date:yyyyMMdd)-$(SourceBranchName)-$(Build.BuildId)
+resources:
+  repositories:
+  - repository: Hub
+    type: git
+    name: public/Hub
+
+variables:
+  - name: appname
+    value: es-sync-service
+  - name: repository
+    value: ctc/es-sync-service
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - test1
+    - test2
+
+pool:
+  name: vc2-Build
+steps:
+  - checkout: self
+  - checkout: Hub
+  - task: Docker@2
+    inputs:
+      containerRegistry: "eson-docker"
+      repository: $(repository)
+      command: "buildAndPush"
+      Dockerfile: "$(Build.SourcesDirectory)/$(Build.Repository.Name)/Dockerfile"
+      buildContext: "$(Build.SourcesDirectory)/$(Build.Repository.Name)/"
+  - task: DeleteFiles@1
+    inputs:
+      SourceFolder: "shell/"
+      Contents: "*"
+  - task: CopyFiles@2
+    inputs:
+      SourceFolder: "$(Build.SourcesDirectory)/Hub"
+      Contents: |
+        $(Build.SourcesDirectory)/**/*.sh      
+        $(Build.SourcesDirectory)/**/base/**
+        $(Build.SourcesDirectory)/**/base-share/**
+        $(Build.SourcesDirectory)/**/$(appname)*/**
+      TargetFolder: "$(Build.SourcesDirectory)/shell"
+  - task: PublishBuildArtifacts@1
+    inputs:
+      PathtoPublish: "$(Build.SourcesDirectory)/shell"
+      ArtifactName: "shell"
+      publishLocation: "Container"
