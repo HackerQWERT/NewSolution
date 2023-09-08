@@ -1,10 +1,10 @@
 ﻿
 using Nest;
 
-var settings = new ConnectionSettings(new Uri("https://localhost:9200"))
-           .DefaultIndex("index")
-           .BasicAuthentication("elastic", "L*QEKkMyg+AV7CPe0Drj")
-           .CertificateFingerprint("0763eb6ca7a527b19db69ddf73f5e1de2d7c42847270d9cf25f2cd6f5d8370e8");
+var settings = new ConnectionSettings(new Uri("http://test1.k8s.yx.com:39200"))
+           .DefaultIndex("index");
+//    .BasicAuthentication("elastic", "L*QEKkMyg+AV7CPe0Drj")
+//    .CertificateFingerprint("0763eb6ca7a527b19db69ddf73f5e1de2d7c42847270d9cf25f2cd6f5d8370e8");
 
 var NestClient = new ElasticClient(settings);
 

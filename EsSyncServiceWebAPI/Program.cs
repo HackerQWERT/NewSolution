@@ -1,4 +1,3 @@
-using EsSyncServiceWebAPI;
 
 var builder = WebApplication.CreateBuilder(args);
 

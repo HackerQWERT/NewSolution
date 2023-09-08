@@ -8,6 +8,7 @@
     "Newtonsoft",
     "oldguids",
     "Serilog",
+    "weatherforecast",
     "xpack"
   ],
   "dotnet.defaultSolution": "NewSolution.sln"
