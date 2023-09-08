@@ -1,4 +1,4 @@
-﻿namespace EsSyncServiceWebAPI;
+﻿namespace EsSyncService.Services;
 
 public class EsLooseSyncService : BackgroundService
 {

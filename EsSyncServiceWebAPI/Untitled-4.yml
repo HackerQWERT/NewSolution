@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: $CTC_APPNAME
+  namespace: $CTC_KNAMESPACE
+spec:
+  selector:
+    matchLabels:
+      app: $CTC_APPNAME
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: $CTC_APPNAME
+          volumeMounts:
+            - mountPath: /app/model
+              name: alg
+              subPath: erase/
+      volumes:
+        - name: alg 
+          persistentVolumeClaim:
+            claimName: alg-pvc
+      nodeSelector:
+        work: gpu
+      tolerations:
+      - key: work
+        operator: Equal
+        value: gpu
+        effect: NoSchedule

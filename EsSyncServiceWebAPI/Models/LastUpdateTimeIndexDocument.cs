@@ -1,4 +1,4 @@
-﻿namespace EsSyncServiceWebAPI.Models;
+﻿namespace EsSyncService.Models;
 
 public class LastUpdateTimeIndexDocument
 {

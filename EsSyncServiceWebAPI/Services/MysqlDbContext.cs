@@ -1,8 +1,4 @@
-﻿using EsSyncService.Models;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.Extensions.Configuration;
-
+﻿
 namespace EsSyncService.Services;
 
 public class MysqlDbContext : DbContext
