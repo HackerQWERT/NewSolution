@@ -1,32 +1,31 @@
-﻿class MyClass
+﻿using System.Globalization;
+
+var s = true ? 1 : 2;
+
+
+
+
+
+
+
+
+
+
+
+
+DateTime dateTime1 = DateTime.ParseExact("2023-06-13 03:28:02.638113", "yyyy-MM-dd HH:mm:ss.ffffff", CultureInfo.InvariantCulture);
+System.Console.WriteLine(dateTime1.ToString("yyyy-MM-dd HH:mm:ss.ffffff"));
+DateTime dateTime2 = DateTime.ParseExact("2023 / 6 / 13 3:28:02", "yyyy-MM-dd HH:mm:ss.ffffff", CultureInfo.InvariantCulture);
+System.Console.WriteLine(dateTime2.ToString("yyyy-MM-dd HH:mm:ss.ffffff"));
+System.Console.WriteLine(dateTime1 == dateTime2);
+try
 {
-    static int count;
 
-
-
-    public MyClass()
-    {
-        count++;
-    }
-    public void A()
-    {
-        count++;
-    }
-
-    public static int GetCount()
-    {
-        return count;
-    }
 }
-// // using System.Data;
-// // using Microsoft.EntityFrameworkCore;
-// // using Play.Services;
+finally
+{
 
-
-
-
-
-
+}
 // List<int> ints = new() { 1, 5, 1, 4 };
 // ints.Sort((x, y) => 1);
 // ints.ForEach(x => System.Console.Write(x + "\t"));

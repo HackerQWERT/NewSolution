@@ -6,8 +6,7 @@ public class EsTightlySyncService : BackgroundService
 
 {
     private IServiceProvider ServiceProvider { get; init; }
-
-    public IElasticClient NestClient { get; set; }
+    private ILogger Logger { get; init; }
 
     private DateTime LastUpdateTime { get; set; } = DateTime.UtcNow;
 
@@ -20,13 +19,9 @@ public class EsTightlySyncService : BackgroundService
 
         this.Configuration = configuration;
 
+        this.Logger = serviceProvider.GetRequiredService<ILogger>();
 
-        var settings = new ConnectionSettings(new Uri(Configuration.GetValue<string>("Elasticsearch:Url")!))
-                   .DefaultIndex(Configuration.GetValue<string>("Elasticsearch:Index"))
-                   .BasicAuthentication(Configuration.GetValue<string>("Elasticsearch:Username"), Configuration.GetValue<string>("Elasticsearch:Password"))
-                   .CertificateFingerprint(Configuration.GetValue<string>("Elasticsearch:CertificateFingerprint"));
 
-        NestClient = new ElasticClient(settings);
 
     }
 
@@ -37,23 +32,35 @@ public class EsTightlySyncService : BackgroundService
     /// <returns></returns>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+
         while (!stoppingToken.IsCancellationRequested)
         {
+
             try
             {
                 using var scope = ServiceProvider.CreateAsyncScope();
+
+                var settings = new ConnectionSettings(new Uri(Configuration.GetValue<string>("Elasticsearch:Url")!))
+                           .DefaultIndex(Configuration.GetValue<string>("Elasticsearch:Index"))
+                           .BasicAuthentication(Configuration.GetValue<string>("Elasticsearch:Username"), Configuration.GetValue<string>("Elasticsearch:Password"))
+                           .CertificateFingerprint(Configuration.GetValue<string>("Elasticsearch:CertificateFingerprint"));
+
+                // settings.EnableApiVersioningHeader(); // enable ES 7.x compatibility on ES 8.x servers
+
+                var elasticClient = new ElasticClient(settings);
+
                 MysqlDbContext mysqlDbContext = scope.ServiceProvider.GetRequiredService<MysqlDbContext>();
-
-                var isExited = await IndexExistsAsync(Configuration.GetValue<string>("Elasticsearch:Index")!);
+                var isExited = await IndexExistsAsync(Configuration.GetValue<string>("Elasticsearch:Index")!, elasticClient);
                 if (!isExited)
-                    await CreateIndexAsync(Configuration.GetValue<string>("Elasticsearch:Index")!);
+                    await CreateIndexAsync(Configuration.GetValue<string>("Elasticsearch:Index")!, elasticClient);
 
-                await UpdateEsDataAsync(Configuration.GetValue<string>("Elasticsearch:Index")!, mysqlDbContext);
+                await UpdateEsDataAsync(Configuration.GetValue<string>("Elasticsearch:Index")!, mysqlDbContext, elasticClient);
             }
             catch (Exception ex)
             {
                 System.Console.WriteLine(ex.Message);
             }
+
 
             await Task.Delay(TimeSpan.FromSeconds(Configuration.GetValue<int>("EsTightlySyncServiceSeconds")!));
         }
@@ -89,22 +96,33 @@ public class EsTightlySyncService : BackgroundService
         while (true)
         {
             System.Console.WriteLine(LastUpdateTime);
-
-            var updatedData = await mysqlDbContext.MemoryItems
-                .Where(x => x.UpdateTime > LastUpdateTime)
-                .OrderBy(x => x.Id)
-                .Skip(pageIndex * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
-
-            if (updatedData.Count == 0)
+            try
             {
-                break;
+                var updatedData = await mysqlDbContext.MemoryItems
+                    .Where(x => x.UpdateTime > LastUpdateTime)
+                    .OrderBy(x => x.Id)
+                    .Skip(pageIndex * pageSize)
+                    .Take(pageSize)
+                    .ToListAsync();
+
+                if (updatedData.Count == 0)
+                {
+                    break;
+                }
+
+                yield return updatedData;
+
+                pageIndex++;
             }
 
-            yield return updatedData;
+            finally
+            {
 
-            pageIndex++;
+
+            }
+
+
+
         }
 
     }
@@ -116,22 +134,28 @@ public class EsTightlySyncService : BackgroundService
     /// 更新es中的数据
     /// </summary>
     /// <returns></returns>
-    public async Task UpdateEsDataAsync(string indexName, MysqlDbContext mysqlDbContext)
+    public async Task UpdateEsDataAsync(string indexName, MysqlDbContext mysqlDbContext, ElasticClient elasticClient)
     {
         List<Task> tasks = new List<Task>();
-        LastUpdateTime = await ReadLastUpdateTimeInEsAsync(Configuration.GetValue<string>("Elasticsearch:LastUpdateTimeIndex")!);
+        LastUpdateTime = await ReadLastUpdateTimeInEsAsync(Configuration.GetValue<string>("Elasticsearch:LastUpdateTimeIndex")!, elasticClient);
+        LastUpdateTime = LastUpdateTime == default ? LastUpdateTime : LastUpdateTime -= TimeSpan.FromDays(1);
         var runTime = DateTime.UtcNow;
+        int failedCount = 0;
+        int totalCount = 0;
+        SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1);
 
         await foreach (var updatedData in GetUpdatedDataFromMysqlAsync(mysqlDbContext))
         {
             if (updatedData.Count == 0)
-                System.Console.WriteLine("没有数据");
+                Logger.Information("没有数据");
             var tempUpdatedData = updatedData;
+
+            totalCount += tempUpdatedData.Count;
 
             tasks.Add(
                 Task.Run(async () =>
                 {
-                    var bulkResponse = await NestClient.BulkAsync(b => b
+                    var bulkResponse = await elasticClient.BulkAsync(b => b
                         .Index(indexName)
                         .UpdateMany<MemoryItem>(tempUpdatedData, (u, d) => u
                             .Id(d.Id)
@@ -139,22 +163,37 @@ public class EsTightlySyncService : BackgroundService
                             .Doc(d)
                         )
                     );
-                    bulkResponse.Items.ToList().ForEach(x =>
+                    bulkResponse.Items.ToList().ForEach(async x =>
                     {
                         if (x.Result == "updated")
-                            System.Console.WriteLine($"更新成功，Id:{x.Id}");
+                            Logger.Information($"更新成功，Id:{x.Id}");
                         else if (x.Result == "created")
-                            System.Console.WriteLine($"创建成功，Id:{x.Id}");
+                            Logger.Information($"创建成功，Id:{x.Id}");
                         else if (x.Result == "deleted")
-                            System.Console.WriteLine($"删除成功，Id:{x.Id}");
+                            Logger.Information($"删除成功，Id:{x.Id}");
                         else if (x.Result == "noop")
-                            System.Console.WriteLine($"无需更新，Id:{x.Id}");
+                            Logger.Information($"无需更新，Id:{x.Id}");
                         else if (x.Result == "not_found")
-                            System.Console.WriteLine($"未找到，Id:{x.Id}");
+                            Logger.Warning($"未找到，Id:{x.Id}");
                         else if (x.Result == "error")
                         {
-                            System.Console.WriteLine($"更新/创建失败，Id:{x.Id}");
-                            System.Console.WriteLine(x.Error.Reason);
+                            Logger.Error($"更新/创建失败，Id:{x.Id}");
+                            Logger.Error(x.Error.Reason);
+                            try
+                            {
+                                await semaphoreSlim.WaitAsync(TimeSpan.FromSeconds(10));
+                                failedCount++;
+
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.Error(ex.Message);
+                            }
+                            finally
+                            {
+                                semaphoreSlim.Release();
+                            }
+
                         }
                     });
                 }));
@@ -198,8 +237,15 @@ public class EsTightlySyncService : BackgroundService
         }
         await Task.WhenAll(tasks);
 
+
+        Logger.Information($"更新最新同步时间到ES成功，开始时间：{runTime}");
+        Logger.Information($"本次耗时：{DateTime.UtcNow - runTime}");
+
+        Logger.Information($"一共处理{totalCount}条数据");
+        Logger.Warning($"失败更新{failedCount}条数据");
         LastUpdateTime = runTime;
-        await UpdateLastUpdateTimeInEsAsync(Configuration["Elasticsearch:LastUpdateTimeIndex"]!, LastUpdateTime);
+        await UpdateLastUpdateTimeInEsAsync(Configuration["Elasticsearch:LastUpdateTimeIndex"]!, LastUpdateTime, elasticClient);
+
     }
 
 
@@ -210,9 +256,9 @@ public class EsTightlySyncService : BackgroundService
     /// </summary>
     /// <param name="indexName"></param>
     /// <returns></returns>
-    private async Task<bool> IndexExistsAsync(string indexName)
+    private async Task<bool> IndexExistsAsync(string indexName, ElasticClient elasticClient)
     {
-        var indexExistsResponse = await NestClient.Indices.ExistsAsync(indexName);
+        var indexExistsResponse = await elasticClient.Indices.ExistsAsync(indexName);
 
         return indexExistsResponse.Exists;
     }
@@ -225,15 +271,18 @@ public class EsTightlySyncService : BackgroundService
     /// </summary>
     /// <param name="indexName">索引名</param>
     /// <returns></returns>
-    private async Task CreateIndexAsync(string indexName)
+    private async Task CreateIndexAsync(string indexName, ElasticClient elasticClient)
     {
-        var createIndexResponse = await NestClient.Indices.CreateAsync(indexName, c => c
+        var createIndexResponse = await elasticClient.Indices.CreateAsync(indexName, c => c
             .Map(m => m.AutoMap())
         );
         if (createIndexResponse.IsValid)
-            System.Console.WriteLine("创建索引成功");
+            Logger.Information("创建索引成功");
         else
-            System.Console.WriteLine("创建索引失败");
+        {
+            Logger.Fatal("创建索引失败");
+            Logger.Fatal(createIndexResponse.DebugInformation);
+        }
     }
 
 
@@ -241,13 +290,13 @@ public class EsTightlySyncService : BackgroundService
     /// 从ES中读取最新同步时间
     /// </summary>
     /// <returns></returns>
-    private async Task<DateTime> ReadLastUpdateTimeInEsAsync(string indexName)
+    private async Task<DateTime> ReadLastUpdateTimeInEsAsync(string indexName, ElasticClient elasticClient)
     {
-        var isIndexExist = await IndexExistsAsync(indexName);
+        var isIndexExist = await IndexExistsAsync(indexName, elasticClient);
         if (!isIndexExist)
-            await CreateIndexAsync(indexName);
+            await CreateIndexAsync(indexName, elasticClient);
 
-        var searchResponse = await NestClient.SearchAsync<LastUpdateTimeIndexDocument>(s => s
+        var searchResponse = await elasticClient.SearchAsync<LastUpdateTimeIndexDocument>(s => s
             .Index(indexName)
             .Query(q => q
                 .MatchAll()
@@ -273,13 +322,13 @@ public class EsTightlySyncService : BackgroundService
     /// <param name="indexName"></param>
     /// <param name="lastUpdateTime"></param>
     /// <returns></returns>
-    private async Task UpdateLastUpdateTimeInEsAsync(string indexName, DateTime lastUpdateTime)
+    private async Task UpdateLastUpdateTimeInEsAsync(string indexName, DateTime lastUpdateTime, ElasticClient elasticClient)
     {
-        var isIndexExist = await IndexExistsAsync(indexName);
+        var isIndexExist = await IndexExistsAsync(indexName, elasticClient);
         if (!isIndexExist)
-            await CreateIndexAsync(indexName);
+            await CreateIndexAsync(indexName, elasticClient);
 
-        var updateResponse = await NestClient.UpdateAsync<LastUpdateTimeIndexDocument>(1, u => u
+        var updateResponse = await elasticClient.UpdateAsync<LastUpdateTimeIndexDocument>(1, u => u
             .Index(indexName)
             .DocAsUpsert(true)
             .Doc(new LastUpdateTimeIndexDocument

@@ -2,12 +2,21 @@
 using Nest;
 
 var settings = new ConnectionSettings(new Uri("http://test1.k8s.yx.com:39200"))
-           .DefaultIndex("index");
-//    .BasicAuthentication("elastic", "L*QEKkMyg+AV7CPe0Drj")
-//    .CertificateFingerprint("0763eb6ca7a527b19db69ddf73f5e1de2d7c42847270d9cf25f2cd6f5d8370e8");
+           .DefaultIndex("index")
+   .BasicAuthentication("", "")
+   .CertificateFingerprint("");
 
 var NestClient = new ElasticClient(settings);
 
+// var searchResponse = await NestClient.CountAsync<MemoryItem>(s => s
+//     .Query(q => q.MatchAll())
+// );
+
+// if (searchResponse.IsValid)
+// {
+//     long count = searchResponse.Count;
+//     Console.WriteLine($"Total count: {count}");
+// }
 
 
 
@@ -15,7 +24,7 @@ var searchResponse = await NestClient.SearchAsync<MemoryItem>(s => s
     .Query(q => q
         .Term(t => t
             .Field(f => f.Id)
-            .Value(111111111972564772)
+            .Value(14996975)
         )
     )
 );
