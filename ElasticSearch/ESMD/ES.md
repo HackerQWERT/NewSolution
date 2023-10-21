@@ -56,7 +56,7 @@ $`安装证书`$
 
 https://github.com/medcl/elasticsearch-analysis-ik
 
-`./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v8.8.2/elasticsearch-analysis-ik-8.8.2.zip`
+`./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v8.9.0/elasticsearch-analysis-ik-8.9.0.zip`
 
 # Elasticsearch 安全配置信息
 
@@ -69,9 +69,9 @@ Elasticsearch 的安全功能已经自动配置完成:
 
 #### 8.9.0
 
-`li*M8VNdSsCRvU0IHoE3`
+` L_L-7G9NTNFuzx9eTaxZ`
 
-#### 8.8.2
+#### 8.9.0
 
 `eGIutE2ZGircY53s30tf`
 
@@ -81,9 +81,9 @@ Elasticsearch 的安全功能已经自动配置完成:
 
 #### 8.9.0
 
-` 67d28593b8f52ad07bdef8da44fccba1ad05fb2e9ae0bc9729d471eff1ee88a3`
+`52850cd0c96b58b4a4d37e443522027bbe41cbaba7c9d1abf0bc63711d13f7eb`
 
-#### 8.8.2
+#### 8.9.0
 
 ` bb7754cc33e56594e4009d67086864064d25310d7d265ba2941b8fd46101288d`
 
@@ -96,11 +96,11 @@ Elasticsearch 的安全功能已经自动配置完成:
 #### 8.9.0
 
 ```
-  eyJ2ZXIiOiI4LjkuMCIsImFkciI6WyIxNzIuMTguMC4yOjkyMDAiXSwiZmdyIjoiNjdkMjg1OTNiOGY1MmFkMDdiZGVmOGRhNDRmY2NiYTFhZDA1ZmIyZTlhZTBiYzk3MjlkNDcxZWZmMWVlODhhMyIsImtleSI6IjZEc2k0b2tCbGxtX2pnZ21PUlpxOk4zcU9yUnktUlJXcmxUZG1Sdm1KNUEifQ==
+ 	eyJ2ZXIiOiI4LjkuMCIsImFkciI6WyIxNzIuMjMuMTc3LjE5Nzo5MjAwIl0sImZnciI6IjUyODUwY2QwYzk2YjU4YjRhNGQzN2U0NDM1MjIwMjdiYmU0MWNiYWJhN2M5ZDFhYmYwYmM2MzcxMWQxM2Y3ZWIiLCJrZXkiOiJITUpNVVlzQnQ4cHJMd004NzhGMDpUbkVBYTMyTVJfdXhMWUFRYW1lbUpRIn0=
 
 ```
 
-#### 8.8.2
+#### 8.9.0
 
 ```
  eyJ2ZXIiOiI4LjguMiIsImFkciI6WyIxNzIuMTguMC4yOjkyMDAiXSwiZmdyIjoiYmI3NzU0Y2MzM2U1NjU5NGU0MDA5ZDY3MDg2ODY0MDY0ZDI1MzEwZDdkMjY1YmEyOTQxYjhmZDQ2MTAxMjg4ZCIsImtleSI6Im5jTlE0b2tCMUl3bnREREZNV0d0OmFCYWExN3ZwUlVxZEJ1SV9sZERwREEifQ==
@@ -121,7 +121,7 @@ Elasticsearch 的安全功能已经自动配置完成:
 
 ```
 
-#### 8.8.2
+#### 8.9.0
 
 ```
   eyJ2ZXIiOiI4LjguMiIsImFkciI6WyIxNzIuMTguMC4yOjkyMDAiXSwiZmdyIjoiYmI3NzU0Y2MzM2U1NjU5NGU0MDA5ZDY3MDg2ODY0MDY0ZDI1MzEwZDdkMjY1YmEyOTQxYjhmZDQ2MTAxMjg4ZCIsImtleSI6Im5zTlE0b2tCMUl3bnREREZNV0d0OlV3bFZiMmNyU2Jhc0tiQV9kc1Voa0EifQ==
@@ -138,13 +138,16 @@ docker run -e "ENROLLMENT_TOKEN=<token>" docker.elastic.co/elasticsearch/elastic
 # $Linux安装ES$
 
 ```shell
-wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.8.2-linux-x86_64.tar.gz
-wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.8.2-linux-x86_64.tar.gz.sha512
-shasum -a 512 -c elasticsearch-8.8.2-linux-x86_64.tar.gz.sha512
-tar -xzf elasticsearch-8.8.2-linux-x86_64.tar.gz
-cd elasticsearch-8.8.2/
+wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.9.0-linux-x86_64.tar.gz
+wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.9.0-linux-x86_64.tar.gz.sha512
+shasum -a 512 -c elasticsearch-8.9.0-linux-x86_64.tar.gz.sha512
+tar -xzf elasticsearch-8.9.0-linux-x86_64.tar.gz
+cd elasticsearch-8.9.0/
 ```
-
+# $Linux安装IK$
+```
+./bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v8.9.0/elasticsearch-analysis-ik-8.9.0.zip
+```
 ```
 LICENSE.txt  NOTICE.txt  README.asciidoc  bin  config  elasticsearch-8.9.0  elasticsearch-8.9.0-darwin-x86_64.tar.gz  jdk  lib  logs  modules  plugins
 ```
@@ -205,11 +208,11 @@ have fun.
 
 ## 安装Es
 ```shell
-wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.8.2-linux-x86_64.tar.gz
-wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.8.2-linux-x86_64.tar.gz.sha512
-shasum -a 512 -c elasticsearch-8.8.2-linux-x86_64.tar.gz.sha512 
-tar -xzf elasticsearch-8.8.2-linux-x86_64.tar.gz
-cd elasticsearch-8.8.2/ 
+wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.9.0-linux-x86_64.tar.gz
+wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.9.0-linux-x86_64.tar.gz.sha512
+shasum -a 512 -c elasticsearch-8.9.0-linux-x86_64.tar.gz.sha512 
+tar -xzf elasticsearch-8.9.0-linux-x86_64.tar.gz
+cd elasticsearch-8.9.0/ 
 ```
 
 # Elasticsearch 安全配置信息
@@ -221,27 +224,27 @@ Elasticsearch 的安全功能已经自动配置完成:
 
 ### elastic 用户密码
 
-#### 8.8.2
+#### 8.9.0
 
-`L*QEKkMyg+AV7CPe0Drj`
+` L_L-7G9NTNFuzx9eTaxZ`
 
 可以使用 `bin/elasticsearch-reset-password -u elastic` 重置密码。
 
 ### HTTP CA 证书 SHA256 指纹
 
-#### 8.8.2
+#### 8.9.0
 
-`0763eb6ca7a527b19db69ddf73f5e1de2d7c42847270d9cf25f2cd6f5d8370e8`
+` 52850cd0c96b58b4a4d37e443522027bbe41cbaba7c9d1abf0bc63711d13f7eb`
 ### 复制证书
 
 `docker cp es01:/usr/share/elasticsearch/config/certs/http_ca.crt .`
 
 ### 配置 Kibana 令牌
 `bin/elasticsearch-create-enrollment-token -s kibana`
-#### 8.8.2
+#### 8.9.0
 
 ```
-eyJ2ZXIiOiI4LjguMiIsImFkciI6WyIxNzIuMjAuMjE4LjE1MDo5MjAwIl0sImZnciI6IjA3NjNlYjZjYTdhNTI3YjE5ZGI2OWRkZjczZjVlMWRlMmQ3YzQyODQ3MjcwZDljZjI1ZjJjZDZmNWQ4MzcwZTgiLCJrZXkiOiJHN0ZSSzRvQnVrSkxXZDVKRHp6SDpLcjg1UmF2TVRDQ3JaR2pUQUl3aEFnIn0=
+ 	eyJ2ZXIiOiI4LjkuMCIsImFkciI6WyIxNzIuMjMuMTc3LjE5Nzo5MjAwIl0sImZnciI6IjUyODUwY2QwYzk2YjU4YjRhNGQzN2U0NDM1MjIwMjdiYmU0MWNiYWJhN2M5ZDFhYmYwYmM2MzcxMWQxM2Y3ZWIiLCJrZXkiOiJITUpNVVlzQnQ4cHJMd004NzhGMDpUbkVBYTMyTVJfdXhMWUFRYW1lbUpRIn0=
 ```
 
 ### ℹ️配置其他节点加入该集群：
@@ -261,17 +264,17 @@ eyJ2ZXIiOiI4LjguMiIsImFkciI6WyIxNzIuMjAuMjE4LjE1MDo5MjAwIl0sImZnciI6IjA3NjNlYjZj
 ## 安装 Kibana Linux 64-bit package
 
 ```SHELL
-curl -O https://artifacts.elastic.co/downloads/kibana/kibana-8.8.2-linux-x86_64.tar.gz
-curl https://artifacts.elastic.co/downloads/kibana/kibana-8.8.2-linux-x86_64.tar.gz.sha512 | shasum -a 512 -c - 
-tar -xzf kibana-8.8.2-linux-x86_64.tar.gz
-cd kibana-8.8.2/ 
+curl -O https://artifacts.elastic.co/downloads/kibana/kibana-8.9.0-linux-x86_64.tar.gz
+curl https://artifacts.elastic.co/downloads/kibana/kibana-8.9.0-linux-x86_64.tar.gz.sha512 | shasum -a 512 -c - 
+tar -xzf kibana-8.9.0-linux-x86_64.tar.gz
+cd kibana-8.9.0/ 
 ```
 
 ## 安装 Kibana  Darwin package
 
 ```shell
-curl -O https://artifacts.elastic.co/downloads/kibana/kibana-8.8.2-darwin-x86_64.tar.gz
-curl https://artifacts.elastic.co/downloads/kibana/kibana-8.8.2-darwin-x86_64.tar.gz.sha512 | shasum -a 512 -c - 
-tar -xzf kibana-8.8.2-darwin-x86_64.tar.gz
-cd kibana-8.8.2/ 
+curl -O https://artifacts.elastic.co/downloads/kibana/kibana-8.9.0-darwin-x86_64.tar.gz
+curl https://artifacts.elastic.co/downloads/kibana/kibana-8.9.0-darwin-x86_64.tar.gz.sha512 | shasum -a 512 -c - 
+tar -xzf kibana-8.9.0-darwin-x86_64.tar.gz
+cd kibana-8.9.0/ 
 ```
