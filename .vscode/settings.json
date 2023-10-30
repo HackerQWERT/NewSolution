@@ -1,6 +1,7 @@
 {
   "cSpell.words": [
     "appsettings",
+    "datagram",
     "esontest",
     "Girc",
     "Jeager",
@@ -13,4 +14,3 @@
   ],
   "dotnet.defaultSolution": "NewSolution.sln"
 }
-

@@ -46,8 +46,8 @@ var app = builder.Build();
 
 
 
-app.UseMiddleware<SimpleMiddleware>();
-app.UseMiddleware<Middleware2>();
+app.UseMiddleware<FirstMiddleware>();
+app.UseMiddleware<SecondMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

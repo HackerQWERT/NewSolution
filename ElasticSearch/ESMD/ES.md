@@ -71,9 +71,6 @@ Elasticsearch 的安全功能已经自动配置完成:
 
 ` L_L-7G9NTNFuzx9eTaxZ`
 
-#### 8.9.0
-
-`eGIutE2ZGircY53s30tf`
 
 可以使用 `bin/elasticsearch-reset-password -u elastic` 重置密码。
 
@@ -82,10 +79,6 @@ Elasticsearch 的安全功能已经自动配置完成:
 #### 8.9.0
 
 `52850cd0c96b58b4a4d37e443522027bbe41cbaba7c9d1abf0bc63711d13f7eb`
-
-#### 8.9.0
-
-` bb7754cc33e56594e4009d67086864064d25310d7d265ba2941b8fd46101288d`
 
 ### 复制证书
 
@@ -100,11 +93,6 @@ Elasticsearch 的安全功能已经自动配置完成:
 
 ```
 
-#### 8.9.0
-
-```
- eyJ2ZXIiOiI4LjguMiIsImFkciI6WyIxNzIuMTguMC4yOjkyMDAiXSwiZmdyIjoiYmI3NzU0Y2MzM2U1NjU5NGU0MDA5ZDY3MDg2ODY0MDY0ZDI1MzEwZDdkMjY1YmEyOTQxYjhmZDQ2MTAxMjg4ZCIsImtleSI6Im5jTlE0b2tCMUl3bnREREZNV0d0OmFCYWExN3ZwUlVxZEJ1SV9sZERwREEifQ==
-```
 
 注册令牌的有效期为 30 分钟。 如果您需要生成新的注册令牌，请在现有节点上运行 elasticsearch-create-enrollment-token 工具。 该工具位于 Docker 容器的 Elasticsearch bin 目录中。
 
@@ -119,12 +107,6 @@ Elasticsearch 的安全功能已经自动配置完成:
 ```
   eyJ2ZXIiOiI4LjkuMCIsImFkciI6WyIxNzIuMTguMC4yOjkyMDAiXSwiZmdyIjoiNjdkMjg1OTNiOGY1MmFkMDdiZGVmOGRhNDRmY2NiYTFhZDA1ZmIyZTlhZTBiYzk3MjlkNDcxZWZmMWVlODhhMyIsImtleSI6IjV6c2k0b2tCbGxtX2pnZ21PUlpxOlRBQVBNZjNDVGFxM1ltUGRTVW1mMEEifQ==
 
-```
-
-#### 8.9.0
-
-```
-  eyJ2ZXIiOiI4LjguMiIsImFkciI6WyIxNzIuMTguMC4yOjkyMDAiXSwiZmdyIjoiYmI3NzU0Y2MzM2U1NjU5NGU0MDA5ZDY3MDg2ODY0MDY0ZDI1MzEwZDdkMjY1YmEyOTQxYjhmZDQ2MTAxMjg4ZCIsImtleSI6Im5zTlE0b2tCMUl3bnREREZNV0d0OlV3bFZiMmNyU2Jhc0tiQV9kc1Voa0EifQ==
 ```
 
 ### 如果在 Docker 中运行,可使用以下命令加入集群

@@ -1,5 +1,7 @@
 ﻿
+using System.Globalization;
 using Nest;
+using Index = Nest.Index;
 
 var settings = new ConnectionSettings(new Uri("http://test1.k8s.yx.com:39200"))
            .DefaultIndex("index")
@@ -29,6 +31,27 @@ var searchResponse = await NestClient.SearchAsync<MemoryItem>(s => s
     )
 );
 
+var s = NestClient.Search<MemoryItem>(s => s
+    .Query(q => q
+        .Bool(b => b
+            .Filter(f => f
+                .DateRange(r => r
+                    .Field("DateTime")
+                    .GreaterThanOrEquals("2021-01-01T00:00:00")
+                    .LessThan("2021-01-31T23:59:59")
+                )
+            )
+        )
+    )
+);
+
+
+
+foreach (var hit in searchResponse.Hits)
+{
+    var document = hit.Source;
+    Console.WriteLine($"ID: {hit.Id}, Timestamp: {document.DateTime}, Message: {document.Message}");
+}
 
 // 检查是否有匹配的结果
 if (searchResponse.IsValid && searchResponse.Documents.Any())
@@ -47,10 +70,12 @@ if (searchResponse.IsValid && searchResponse.Documents.Any())
 public class MemoryItem
 {
     public Int64 Id { get; set; }
+    public DateTime DateTime { get; set; }
 
     public Int64 MemoryLibId { get; set; }
 
     public string SrcContent { get; set; }
+    public string Message { get; set; }
 
     public string SrcContentMD5 { get; set; }
 
